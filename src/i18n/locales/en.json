@@ -6,7 +6,13 @@
     "settings": "Settings"
   },
   "Fetch": {
-    "databaseId": "Database ID",
+    "databaseId": "Database",
+    "databases": {
+      "selectDatabase": "Select a database",
+      "database1": "Database 1",
+      "database2": "Database 2",
+      "database3": "Database 3"
+    },
     "integrationToken": "Integration token",
     "keyPropertyName": "Key property name",
     "valuePropertyName": "Value property name",
@@ -53,7 +59,7 @@
     "includeInstances": "Include text in instances",
     "applyValueButton": {
       "label": "Apply value to text",
-      "description": "If the name of the text layer is #<key> (e.g. #userInfo), the text content will be replaced. If the value has an embedded variable, a parameter can be passed to the layer name (e.g. #userInfo?name=John&age=24). If the value is \"Name: {name} / Age: {age}\", the text content will be \"Name: Jogn / Age: 24\"."
+      "description": "If the name of the text layer is #<key> (e.g. #userInfo), the text content will be replaced. If the value has an embedded variable, a parameter can be passed to the layer name (e.g. #userInfo?name=John&age=24). If the value is \"Name: {name} / Age: {age}\", the text content will be \"Name: John / Age: 24\"."
     },
     "renameLayerButton": {
       "label": "Rename layer",
@@ -70,7 +76,7 @@
       "options": {
         "english": "English (Default)",
         "japanese": "Japanese",
-        "russian": "Русский"
+        "russian": "Russian"
       }
     },
     "buttons": {
@@ -97,7 +103,10 @@
         "wrongKeyName": "Key property name is wrong.",
         "wrongValueName": "Value property name is wrong.",
         "wrongKeyType": "Key property type is wrong.",
-        "wrongValueType": "Value property type is wrong."
+        "wrongValueType": "Value property type is wrong.",
+        "invalidDatabase": "Invalid database selected.",
+        "unknown": "An unknown error occurred",
+        "noDatabaseSelected": "Please select a database"
       },
       "finish": "Fetch finish.",
       "clearCache": "Cache cleared."

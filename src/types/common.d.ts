@@ -1,3 +1,5 @@
+import type { DatabaseOptionId } from './database'
+
 export type SelectedTabKey = 'fetch' | 'list' | 'utilities' | 'settings'
 export type SelectedTabValue = 'Fetch' | 'List' | 'Utilities' | 'Settings'
 
@@ -14,7 +16,7 @@ export type Options = {
   selectedTabKey: SelectedTabKey
   proxyUrl: string
   integrationToken: string
-  databaseId: string
+  selectedDatabaseId: DatabaseOptionId
   keyPropertyName: string
   valuePropertyName: string
   // list
@@ -67,3 +69,5 @@ export type NotionKeyValue = {
   last_edited_time: string
   url: string
 }
+
+export type { DatabaseOptionId, DatabaseOptionValue }
