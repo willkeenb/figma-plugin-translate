@@ -7,7 +7,7 @@ export type SortOrder = 'ascending' | 'descending'
 
 export type TargetTextRange = 'selection' | 'currentPage' | 'allPages'
 
-export type PluginLanguage = 'en' | 'ja'
+export type PluginLanguage = 'en' | 'ja' | 'ru'
 
 export type Options = {
   // fetch

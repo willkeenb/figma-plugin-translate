@@ -21,6 +21,8 @@ export const resources = {
 export const initOptions: InitOptions = {
   debug: true,
   lng: 'en',
+  fallbackLng: 'en',
+  supportedLngs: ['en', 'ja', 'ru'],
   defaultNS,
   resources,
   interpolation: {
