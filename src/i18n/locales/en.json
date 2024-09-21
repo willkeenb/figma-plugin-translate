@@ -6,19 +6,17 @@
     "settings": "Settings"
   },
   "Fetch": {
-    "databaseId": "Database",
+    "databaseId": "Project",
     "databases": {
       "selectDatabase": "Select a database",
       "database1": "Database 1",
       "database2": "Database 2",
       "database3": "Database 3"
     },
-    "integrationToken": "Integration token",
-    "keyPropertyName": "Key property name",
-    "valuePropertyName": "Value property name",
+    "valuePropertyName": "Choose language",
     "fetchButton": {
-      "label": "Fetch text from Notion",
-      "description": "Fetches text from a database in Notion. The data is cached to this document and restored at next time it is launched. If you have updated Notion database, click this button again."
+      "label": "Update text from Notion",
+      "description": "The data is cached to this document and restored at next time it is launched. If you have update on your database, click this button again"
     },
     "clearCacheButton": "Clear cache ({{length}} items)"
   },

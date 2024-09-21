@@ -38,16 +38,16 @@ export default function App() {
       value: SelectedTabValue
     }[] = [
     {
-      children: <Fetch />,
-      value: t('Tabs.fetch'),
-    },
-    {
       children: <List />,
       value: t('Tabs.list'),
     },
     {
       children: <Utilities />,
       value: t('Tabs.utilities'),
+    },
+    {
+      children: <Fetch />,
+      value: t('Tabs.fetch'),
     },
     {
       children: <Settings />,

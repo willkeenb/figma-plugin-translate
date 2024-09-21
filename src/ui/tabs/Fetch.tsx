@@ -1,5 +1,6 @@
+/** @jsx h */
 import { type JSX, h } from 'preact'
-import { useRef, useState, useCallback, useMemo } from 'preact/hooks'
+import { useRef, useState, useCallback, useMemo, useEffect } from 'preact/hooks'
 
 import {
   Button,
@@ -7,14 +8,14 @@ import {
   Dropdown,
   DropdownOption,
   Stack,
-  Textbox,
   VerticalSpace,
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { useTranslation } from 'react-i18next'
 import { useMount, useUnmount } from 'react-use'
 
-import { DATABASE_OPTIONS } from '@/constants'
+import { INTEGRATION_TOKEN, KEY_PROPERTY_NAME, DATABASE_OPTIONS, VALUE_PROPERTY_OPTIONS } from '@/constants'
+import { ValuePropertyName } from '@/constants'
 import { useKeyValuesStore, useStore } from '@/ui/Store'
 import useCache from '@/ui/hooks/useCache'
 import useNotion from '@/ui/hooks/useNotion'
@@ -43,6 +44,19 @@ export default function Fetch() {
     }))
   , [t])
 
+  const valuePropertyOptions = useMemo<DropdownOption[]>(() => 
+    VALUE_PROPERTY_OPTIONS.map(option => ({
+      text: t(option.labelKey),
+      value: option.value
+    }))
+  , [t])
+
+  
+  const handleValuePropertyChange = useCallback((event: JSX.TargetedEvent<HTMLInputElement>) => {
+    const newValue = event.currentTarget.value as ValuePropertyName
+    updateOptions({ valuePropertyName: newValue })
+  }, [updateOptions])
+
   const handleInput = useCallback((key: keyof Options) => {
     return (event: JSX.TargetedEvent<HTMLInputElement>) => {
       updateOptions({
@@ -68,10 +82,9 @@ export default function Fetch() {
 
     try {
       await fetchNotion({
-        proxyUrl: 'https://reverse-proxy.willkeenbe.workers.dev',
-        integrationToken: options.integrationToken,
+        integrationToken: INTEGRATION_TOKEN,
         selectedDatabaseId: options.selectedDatabaseId,
-        keyPropertyName: options.keyPropertyName,
+        keyPropertyName: KEY_PROPERTY_NAME,
         valuePropertyName: options.valuePropertyName,
         keyValuesArray: keyValuesRef.current,
       })
@@ -105,7 +118,7 @@ export default function Fetch() {
     } finally {
       setFetching(false)
     }
-  }, [fetchNotion, options, saveCacheToDocument, t])
+  }, [options.selectedDatabaseId, options.valuePropertyName, fetchNotion, saveCacheToDocument, t])
 
   const handleClearClick = useCallback(() => {
     console.log('handleClearClick')
@@ -142,32 +155,13 @@ export default function Fetch() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <div>{t('Fetch.integrationToken')}</div>
-          <Textbox
-            variant="border"
-            onInput={handleInput('integrationToken')}
-            value={options.integrationToken}
-            disabled={fetching}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <div>{t('Fetch.keyPropertyName')}</div>
-          <Textbox
-            variant="border"
-            onInput={handleInput('keyPropertyName')}
-            value={options.keyPropertyName}
-            disabled={fetching}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
           <div>{t('Fetch.valuePropertyName')}</div>
-          <Textbox
-            variant="border"
-            onInput={handleInput('valuePropertyName')}
+          <Dropdown
+            options={valuePropertyOptions}
             value={options.valuePropertyName}
+            onChange={handleValuePropertyChange}
             disabled={fetching}
+            variant='border'
           />
         </div>
       </Stack>
@@ -176,34 +170,18 @@ export default function Fetch() {
 
       <Stack space="small">
         <div className="flex flex-col gap-1">
+        <p className="text-secondary">{t('Fetch.fetchButton.description')}</p>
+        <VerticalSpace space="small" />
           <Button
             fullWidth
             onClick={handleFetchClick}
-            disabled={
-              !options.selectedDatabaseId ||
-              !options.integrationToken ||
-              !options.keyPropertyName ||
-              !options.valuePropertyName ||
-              fetching
-            }
+            disabled={!options.selectedDatabaseId || !options.valuePropertyName || fetching}
             loading={fetching}
           >
             {t('Fetch.fetchButton.label')}
           </Button>
-          <p className="text-secondary">{t('Fetch.fetchButton.description')}</p>
         </div>
-
-        <Button
-          danger
-          secondary
-          fullWidth
-          onClick={handleClearClick}
-          disabled={keyValues.length === 0}
-        >
-          {t('Fetch.clearCacheButton', { length: keyValues.length })}
-        </Button>
       </Stack>
-
       <VerticalSpace space="medium" />
     </Container>
   )
