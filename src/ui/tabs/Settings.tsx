@@ -38,6 +38,10 @@ export default function Settings() {
       text: t('Settings.language.options.japanese'),
       value: 'ja',
     },
+    {
+      text: t('Settings.language.options.russian'),
+      value: 'ru',
+    },
   ]
 
   async function handleLanguageDropdownChange(
