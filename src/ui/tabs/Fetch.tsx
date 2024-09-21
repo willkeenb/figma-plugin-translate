@@ -1,10 +1,11 @@
-/** @jsx h */
 import { type JSX, h } from 'preact'
-import { useRef, useState } from 'preact/hooks'
+import { useRef, useState, useCallback, useMemo } from 'preact/hooks'
 
 import {
   Button,
   Container,
+  Dropdown,
+  DropdownOption,
   Stack,
   Textbox,
   VerticalSpace,
@@ -13,6 +14,7 @@ import { emit } from '@create-figma-plugin/utilities'
 import { useTranslation } from 'react-i18next'
 import { useMount, useUnmount } from 'react-use'
 
+import { DATABASE_OPTIONS } from '@/constants'
 import { useKeyValuesStore, useStore } from '@/ui/Store'
 import useCache from '@/ui/hooks/useCache'
 import useNotion from '@/ui/hooks/useNotion'
@@ -20,6 +22,7 @@ import useOptions from '@/ui/hooks/useOptions'
 import useResizeWindow from '@/ui/hooks/useResizeWindow'
 
 import type { NotionKeyValue, Options } from '@/types/common'
+import type { DatabaseOptionId } from '@/types/database'
 import type { NotifyHandler } from '@/types/eventHandler'
 
 export default function Fetch() {
@@ -33,70 +36,85 @@ export default function Fetch() {
   const [fetching, setFetching] = useState(false)
   const keyValuesRef = useRef<NotionKeyValue[]>([])
 
-  function handleInput(key: keyof Options) {
+  const databaseDropdownOptions = useMemo<DropdownOption[]>(() => 
+    DATABASE_OPTIONS.map(option => ({
+      text: t(option.labelKey),
+      value: option.id
+    }))
+  , [t])
+
+  const handleInput = useCallback((key: keyof Options) => {
     return (event: JSX.TargetedEvent<HTMLInputElement>) => {
       updateOptions({
         [key]: event.currentTarget.value,
       })
     }
-  }
+  }, [updateOptions])
 
-  async function handleFetchClick() {
+  const handleDatabaseChange = useCallback((event: JSX.TargetedEvent<HTMLInputElement>) => {
+    const newDatabaseId = event.currentTarget.value as DatabaseOptionId
+    console.log('New database selected:', newDatabaseId)
+    updateOptions({ selectedDatabaseId: newDatabaseId })
+  }, [updateOptions])
+
+  const handleFetchClick = useCallback(async () => {
     setFetching(true)
 
     emit<NotifyHandler>('NOTIFY', {
       message: t('notifications.Fetch.loading'),
     })
 
-    // keyValuesRefをクリア
     keyValuesRef.current = []
 
-    await fetchNotion({
-      proxyUrl: process.env.PROXY_URL as string,
-      integrationToken: options.integrationToken,
-      databaseId: options.databaseId,
-      keyPropertyName: options.keyPropertyName,
-      valuePropertyName: options.valuePropertyName,
-      keyValuesArray: keyValuesRef.current,
-    }).catch((error: Error) => {
+    try {
+      await fetchNotion({
+        proxyUrl: 'https://reverse-proxy.willkeenbe.workers.dev',
+        integrationToken: options.integrationToken,
+        selectedDatabaseId: options.selectedDatabaseId,
+        keyPropertyName: options.keyPropertyName,
+        valuePropertyName: options.valuePropertyName,
+        keyValuesArray: keyValuesRef.current,
+      })
+
+      console.log('fetch done', keyValuesRef.current)
+
+      useKeyValuesStore.setState({ keyValues: keyValuesRef.current })
+      saveCacheToDocument(keyValuesRef.current)
+
       emit<NotifyHandler>('NOTIFY', {
-        message: error.message,
+        message: t('notifications.Fetch.finish'),
+      })
+    } catch (error: unknown) {
+      console.error('Fetch error:', error)
+      let errorMessage: string
+
+      if (error instanceof Error) {
+        errorMessage = error.message
+      } else if (typeof error === 'string') {
+        errorMessage = error
+      } else {
+        errorMessage = t('notifications.Fetch.error.unknown')
+      }
+
+      emit<NotifyHandler>('NOTIFY', {
+        message: errorMessage,
         options: {
           error: true,
         },
       })
+    } finally {
       setFetching(false)
-      throw new Error(error.message)
-    })
+    }
+  }, [fetchNotion, options, saveCacheToDocument, t])
 
-    console.log('fetch done', keyValuesRef.current)
-
-    // keyValuesをkeyValuesStoreに保存
-    useKeyValuesStore.setState({ keyValues: keyValuesRef.current })
-
-    // keyValuesをドキュメントにキャッシュ
-    saveCacheToDocument(keyValuesRef.current)
-
-    setFetching(false)
-
-    emit<NotifyHandler>('NOTIFY', {
-      message: t('notifications.Fetch.finish'),
-    })
-  }
-
-  function handleClearClick() {
+  const handleClearClick = useCallback(() => {
     console.log('handleClearClick')
-
-    // keyValuesStoreに空配列を入れる
     useKeyValuesStore.setState({ keyValues: [] })
-
-    // 空配列をドキュメントにキャッシュ
     saveCacheToDocument([])
-
     emit<NotifyHandler>('NOTIFY', {
       message: t('notifications.Fetch.clearCache'),
     })
-  }
+  }, [saveCacheToDocument, t])
 
   useMount(() => {
     console.log('Fetch mounted')
@@ -114,11 +132,12 @@ export default function Fetch() {
       <Stack space="small">
         <div className="flex flex-col gap-1">
           <div>{t('Fetch.databaseId')}</div>
-          <Textbox
-            variant="border"
-            onInput={handleInput('databaseId')}
-            value={options.databaseId}
+          <Dropdown
+            options={databaseDropdownOptions}
+            value={options.selectedDatabaseId}
+            onChange={handleDatabaseChange}
             disabled={fetching}
+            variant='border'
           />
         </div>
 
@@ -161,7 +180,7 @@ export default function Fetch() {
             fullWidth
             onClick={handleFetchClick}
             disabled={
-              !options.databaseId ||
+              !options.selectedDatabaseId ||
               !options.integrationToken ||
               !options.keyPropertyName ||
               !options.valuePropertyName ||

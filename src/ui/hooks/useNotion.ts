@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { DATABASE_OPTIONS } from '@/constants'
 
 import type {
   NotionFomula,
@@ -8,13 +9,15 @@ import type {
   NotionTitle,
 } from '@/types/common'
 
+import type { DatabaseOptionId } from '@/types/database'
+
 export default function useNotion() {
   const { t } = useTranslation()
 
   async function fetchNotion(options: {
     proxyUrl: string
     integrationToken: string
-    databaseId: string
+    selectedDatabaseId: DatabaseOptionId
     keyPropertyName: string
     valuePropertyName: string
     nextCursor?: string
@@ -22,119 +25,113 @@ export default function useNotion() {
   }) {
     console.log('fetchNotion', options)
 
-    // proxyUrlから末尾のスラッシュを削除
-    const proxyUrl = options.proxyUrl.replace(/\/$/, '')
+    if (!options.selectedDatabaseId) {
+      throw new Error(t('notifications.Fetch.error.noDatabaseSelected'));
+    }
 
-    // パラメータを定義
-    // 引数nextCursorがある場合は、start_cursorを設定
+    const selectedDatabase = DATABASE_OPTIONS.find(db => db.id === options.selectedDatabaseId);
+    if (!selectedDatabase) {
+      throw new Error(t('notifications.Fetch.error.invalidDatabase'));
+    }
+
+    const databaseId = selectedDatabase.id
+
+    const apiUrl = `https://api.notion.com/v1/databases/${databaseId}/query`;
+    const fullUrl = `${options.proxyUrl}/${apiUrl}`;
+
     const reqParams = {
       page_size: 100,
       start_cursor: options.nextCursor || undefined,
     }
 
-    // データベースをfetchしてpageの配列を取得
-    const res = await fetch(
-      `${proxyUrl}/https://api.notion.com/v1/databases/${options.databaseId}/query`,
-      {
+    try {
+      console.log('Sending request to:', fullUrl);
+      console.log('Request params:', reqParams);
+
+      const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${options.integrationToken}`,
-          'Notion-Version': '2021-08-16',
+          'Authorization': `Bearer ${options.integrationToken}`,
+          'Notion-Version': '2022-06-28',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(reqParams),
-      },
-    ).catch(() => {
-      throw new Error(t('notifications.Fetch.error.failedFetch'))
-    })
-    const resJson = await res.json()
-    console.log(resJson)
-    const pages = resJson.results as NotionPage[]
-
-    if (!pages) {
-      // pagesが無かったら処理中断
-      throw new Error(t('notifications.Fetch.error.noPages'))
-    }
-
-    // pageごとに処理実行
-    pages.forEach(row => {
-      // keyPropertyNameと同じプロパティが無かったら処理中断
-      if (!row.properties[options.keyPropertyName]) {
-        throw new Error(t('notifications.Fetch.error.wrongKeyName'))
-      }
-
-      // valuePropertyNameと同じプロパティが無かったら処理中断
-      if (!row.properties[options.valuePropertyName]) {
-        throw new Error(t('notifications.Fetch.error.wrongValueName'))
-      }
-
-      // keyPropertyNameからpropertyを探す
-      const keyProperty = row.properties[options.keyPropertyName]
-      // keyのtypeがtitle, formula, textでない場合は処理中断
-      if (
-        keyProperty.type !== 'title' &&
-        keyProperty.type !== 'rich_text' &&
-        keyProperty.type !== 'formula'
-      ) {
-        throw new Error(t('notifications.Fetch.error.wrongKeyType'))
-      }
-      // propertyのtypeを判別してkeyを取得する
-      const key = getPropertyValue(keyProperty)
-
-      // valuePropertyNameからpropertyを探す
-      const valueProperty = row.properties[options.valuePropertyName]
-      // valueのtypeがtitle, formula, textでない場合は処理中断
-      if (
-        valueProperty.type !== 'title' &&
-        valueProperty.type !== 'rich_text' &&
-        valueProperty.type !== 'formula'
-      ) {
-        throw new Error(t('notifications.Fetch.error.wrongValueType'))
-      }
-      // propertyのtypeを判別してvalueを取得する
-      const value = getPropertyValue(valueProperty)
-
-      // keyValuesの配列にkeyとvalueを追加
-      options.keyValuesArray.push({
-        id: row.id,
-        key,
-        value,
-        created_time: row.created_time,
-        last_edited_time: row.last_edited_time,
-        url: row.url,
       })
-    })
 
-    if (resJson.has_more) {
-      // resのhas_moreフラグがtrueなら、nextCursorに値を入れて再度fetchNotion関数を実行
-      // falseなら終了
-      await fetchNotion({ ...options, nextCursor: resJson.next_cursor })
-    } else {
-      return
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Notion API error:', errorText);
+        throw new Error(`${t('notifications.Fetch.error.failedFetch')}: ${errorText}`)
+      }
+
+      const resJson = await response.json()
+      console.log('Response:', resJson)
+      const pages = resJson.results as NotionPage[]
+
+
+      if (!pages || pages.length === 0) {
+        throw new Error(t('notifications.Fetch.error.noPages'))
+      }
+
+      pages.forEach(row => {
+        if (!row.properties[options.keyPropertyName]) {
+          throw new Error(t('notifications.Fetch.error.wrongKeyName'))
+        }
+
+        if (!row.properties[options.valuePropertyName]) {
+          throw new Error(t('notifications.Fetch.error.wrongValueName'))
+        }
+
+        const keyProperty = row.properties[options.keyPropertyName]
+        if (
+          keyProperty.type !== 'title' &&
+          keyProperty.type !== 'rich_text' &&
+          keyProperty.type !== 'formula'
+        ) {
+          throw new Error(t('notifications.Fetch.error.wrongKeyType'))
+        }
+        const key = getPropertyValue(keyProperty)
+
+        const valueProperty = row.properties[options.valuePropertyName]
+        if (
+          valueProperty.type !== 'title' &&
+          valueProperty.type !== 'rich_text' &&
+          valueProperty.type !== 'formula'
+        ) {
+          throw new Error(t('notifications.Fetch.error.wrongValueType'))
+        }
+        const value = getPropertyValue(valueProperty)
+
+        options.keyValuesArray.push({
+          id: row.id,
+          key,
+          value,
+          created_time: row.created_time,
+          last_edited_time: row.last_edited_time,
+          url: row.url,
+        })
+      })
+
+      if (resJson.has_more) {
+        await fetchNotion({ ...options, nextCursor: resJson.next_cursor })
+      }
+    } catch (error) {
+      console.error('Error in fetchNotion:', error)
+      throw error
     }
   }
 
   function getPropertyValue(
     property: NotionTitle | NotionFomula | NotionRichText,
   ): string {
-    let value: string
+    let value: string = ''
 
     if (property.type === 'title') {
-      if (property.title.length) {
-        value = property.title[0].plain_text
-      } else {
-        value = ''
-      }
+      value = property.title[0]?.plain_text || ''
     } else if (property.type === 'rich_text') {
-      if (property.rich_text.length) {
-        value = property.rich_text[0].plain_text
-      } else {
-        value = ''
-      }
+      value = property.rich_text[0]?.plain_text || ''
     } else if (property.type === 'formula') {
-      value = property.formula.string
-    } else {
-      value = ''
+      value = property.formula.string || ''
     }
 
     return value
