@@ -1,4 +1,4 @@
-import type { DatabaseOptionId } from './database'
+import type { DatabaseOptionId, ValuePropertyName } from './database'
 
 export type SelectedTabKey = 'fetch' | 'list' | 'utilities' | 'settings'
 export type SelectedTabValue = 'Fetch' | 'List' | 'Utilities' | 'Settings'
@@ -14,11 +14,8 @@ export type PluginLanguage = 'en' | 'ja' | 'ru'
 export type Options = {
   // fetch
   selectedTabKey: SelectedTabKey
-  proxyUrl: string
-  integrationToken: string
   selectedDatabaseId: DatabaseOptionId
-  keyPropertyName: string
-  valuePropertyName: string
+  valuePropertyName: ValuePropertyName
   // list
   filterString: string
   sortValue: SortValue
@@ -70,4 +67,4 @@ export type NotionKeyValue = {
   url: string
 }
 
-export type { DatabaseOptionId, DatabaseOptionValue }
+export type { DatabaseOptionId }

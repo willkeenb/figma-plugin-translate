@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { DATABASE_OPTIONS } from '@/constants'
+import { DATABASE_OPTIONS, PROXY_URL } from '@/constants'
 
 import type {
   NotionFomula,
@@ -15,7 +15,6 @@ export default function useNotion() {
   const { t } = useTranslation()
 
   async function fetchNotion(options: {
-    proxyUrl: string
     integrationToken: string
     selectedDatabaseId: DatabaseOptionId
     keyPropertyName: string
@@ -36,8 +35,8 @@ export default function useNotion() {
 
     const databaseId = selectedDatabase.id
 
-    const apiUrl = `https://api.notion.com/v1/databases/${databaseId}/query`;
-    const fullUrl = `${options.proxyUrl}/${apiUrl}`;
+    const apiUrl = `https://api.notion.com/v1/databases/${options.selectedDatabaseId}/query`;
+    const fullUrl = `${PROXY_URL}/${encodeURIComponent(apiUrl)}`;
 
     const reqParams = {
       page_size: 100,
