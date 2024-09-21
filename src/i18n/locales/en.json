@@ -69,7 +69,8 @@
       "label": "Language",
       "options": {
         "english": "English (Default)",
-        "japanese": "Japanese"
+        "japanese": "Japanese",
+        "russian": "Русский"
       }
     },
     "buttons": {

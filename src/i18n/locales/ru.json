@@ -1,0 +1,69 @@
+{
+    "Settings": {
+      "language": {
+        "label": "Язык",
+        "options": {
+          "english": "Английский (по умолчанию)",
+          "japanese": "Японский",
+          "russian": "Русский"
+        }
+      },
+      "buttons": {
+        "pluginPage": "Страница плагина",
+        "github": "GitHub"
+      }
+    },
+    "KeyValueList": {
+      "empty": "Нет элементов",
+      "loading": "Загрузка..."
+    },
+    "KeyValueRow": {
+      "key": "Ключ",
+      "value": "Значение",
+      "applyKeyValueButton": "Применить ключ и значение к выбранному тексту",
+      "openBrowserButton": "Открыть в браузере"
+    },
+    "notifications": {
+      "Fetch": {
+        "loading": "Пожалуйста, подождите",
+        "error": {
+          "failedFetch": "Не удалось получить данные из базы данных",
+          "noPages": "В этой базе данных нет страниц",
+          "wrongKeyName": "Неверное имя свойства ключа",
+          "wrongValueName": "Неверное имя свойства значения",
+          "wrongKeyType": "Неверный тип свойства ключа",
+          "wrongValueType": "Неверный тип свойства значения"
+        },
+        "finish": "Получение завершено",
+        "clearCache": "Кэш очищен"
+      },
+      "Settings": {
+        "updateLanguage": "Язык обновлен"
+      },
+      "KeyValueRow": {
+        "copy": "{{title}} скопировано в буфер обмена"
+      },
+      "main": {
+        "noSelections": "Пожалуйста, выберите хотя бы один элемент",
+        "noTextInSelection": "В выбранных элементах нет текста",
+        "noTextInCurrentPage": "На этой странице нет текста",
+        "noTextInAllPages": "На всех страницах нет текста",
+        "errorLoadFonts": "Ошибка при загрузке шрифта"
+      },
+      "applyKeyValue": {
+        "finish": "Ключ и значение применены к выбранному тексту"
+      },
+      "applyValue": {
+        "noMatchingText": "Нет соответствующего текста",
+        "finishSelection": "Значение применено к тексту в выбранных элементах",
+        "finishCurrentPage": "Значение применено к тексту на этой странице",
+        "finishAllPages": "Значение применено к тексту на всех страницах"
+      },
+      "renameLayer": {
+        "finish": "Имя слоя изменено"
+      },
+      "highlightText": {
+        "finish": "Текст выделен"
+      }
+    }
+  }
