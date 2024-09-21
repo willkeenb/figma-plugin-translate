@@ -13,6 +13,7 @@ declare const styles: {
   readonly "border": string;
   readonly "border-b": string;
   readonly "border-b-primary": string;
+  readonly "border-gray-300": string;
   readonly "border-solid": string;
   readonly "cursor-pointer": string;
   readonly "filter": string;
@@ -47,6 +48,7 @@ declare const styles: {
   readonly "py-1": string;
   readonly "relative": string;
   readonly "resize": string;
+  readonly "rounded": string;
   readonly "rounded-2": string;
   readonly "text-12": string;
   readonly "text-link": string;
