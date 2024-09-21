@@ -1,0 +1,65 @@
+{
+  "name": "text-sync",
+  "version": "1.0.0",
+  "license": "MIT",
+  "author": "My",
+  "scripts": {
+    "build": "NODE_ENV=production concurrently -P 'npm:build:* -- {*}' -- --minify",
+    "build:css": "tailwindcss --input ./src/ui/styles/input.css --output ./src/ui/styles/output.css",
+    "build:js": "build-figma-plugin --typecheck",
+    "check": "biome check",
+    "prepare": "husky || true",
+    "watch": "npm run build:css && concurrently -P 'npm:build:* -- {*}' -- --watch"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,cjs,mjs,json}": ["biome check --apply"]
+  },
+  "dependencies": {
+    "@create-figma-plugin/ui": "3.2.0",
+    "@create-figma-plugin/utilities": "3.2.0",
+    "clsx": "2.1.1",
+    "i18next": "23.14.0",
+    "lodash": "4.17.21",
+    "preact": "10.23.2",
+    "query-string": "9.1.0",
+    "react-i18next": "15.0.1",
+    "react-use": "17.5.1",
+    "zustand": "4.5.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.8.3",
+    "@create-figma-plugin/build": "3.2.0",
+    "@create-figma-plugin/tsconfig": "3.2.0",
+    "@figma/plugin-typings": "1.98.0",
+    "@types/lodash": "4.17.7",
+    "@types/node": "22.5.0",
+    "concurrently": "8.2.2",
+    "dotenv": "16.4.5",
+    "husky": "9.1.5",
+    "lint-staged": "15.2.9",
+    "tailwindcss": "3.4.10",
+    "typescript": "5.5.4"
+  },
+  "figma-plugin": {
+    "editorType": ["figma"],
+    "id": "1418849803064613337",
+    "name": "Text Sync",
+    "main": "src/main/index.ts",
+    "ui": "src/ui/index.tsx",
+    "relaunchButtons": {
+      "open": {
+        "name": "Text Sync",
+        "main": "src/main/index.ts",
+        "ui": "src/ui/index.tsx"
+      }
+    },
+    "documentAccess": "dynamic-page",
+    "networkAccess": {
+      "allowedDomains": [
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com",
+        "https://*.workers.dev"
+      ]
+    }
+  }
+}
