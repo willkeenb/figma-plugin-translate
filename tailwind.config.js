@@ -36,6 +36,7 @@ export default {
       },
       spacing: {
         '0_5': '2px',
+        '1': '4px',
         '1_5': '6px',
       },
     },

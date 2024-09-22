@@ -57,7 +57,7 @@ export default function App() {
 
   function handleTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const newTabValue = event.currentTarget.value as SelectedTabValue
-    let newTabKey: SelectedTabKey = 'fetch'
+    let newTabKey: SelectedTabKey = 'list'
 
     if (newTabValue === t('Tabs.fetch')) {
       newTabKey = 'fetch'
