@@ -4,6 +4,7 @@ import { getTextNodes } from '@/main/util'
 
 import type { NotionKeyValue, TargetTextRange } from '@/types/common'
 
+// Функция для создания прямоугольников подсветки на странице
 async function createHighlightRectOnPage(
   keyValues: NotionKeyValue[],
   textNodes: TextNode[],
@@ -11,15 +12,15 @@ async function createHighlightRectOnPage(
 ) {
   console.log('createHighlightRectOnPage', textNodes, pageNode)
 
-  // correctLayerNameFormatTextNodesを格納する配列を用意
+  // Массив для хранения текстовых узлов с корректным форматом имени слоя
   let correctLayerNameFormatTextNodes: TextNode[] = []
 
-  // Rectangleを格納する配列を用意
+  // Массивы для хранения прямоугольников
   let rectNodes: RectangleNode[] = []
   const correctRectNodes: RectangleNode[] = []
   const incorrectRectNodes: RectangleNode[] = []
 
-  // textNodeの中からレイヤー名が#で始まるものだけを探してcorrectLayerNameFormatTextNodesに追加する
+  // Фильтруем текстовые узлы, оставляя только те, чье имя начинается с #
   correctLayerNameFormatTextNodes = textNodes.filter(textNode => {
     console.log(textNode.name)
     return textNode.name.startsWith('#')
@@ -31,12 +32,12 @@ async function createHighlightRectOnPage(
   )
 
   if (correctLayerNameFormatTextNodes.length === 0) {
-    // correctLayerNameFormatTextNodesが空の場合は処理を終了
+    // Если нет подходящих текстовых узлов, завершаем выполнение
     console.log('no matched text')
     return
   }
 
-  // 以前生成したgroupを探して、削除
+  // Находим и удаляем ранее созданную группу
   const generatedGroupId = pageNode.getPluginData(GROUP_ID_KEY)
   const previousGeneratedGroup = pageNode.findOne(
     node => node.id === generatedGroupId,
@@ -47,21 +48,20 @@ async function createHighlightRectOnPage(
     previousGeneratedGroup.remove()
   }
 
-  // correctLayerNameFormatTextNodesごとに処理を実行
+  // Обрабатываем каждый текстовый узел
   await Promise.all(
     correctLayerNameFormatTextNodes.map(async textNode => {
-      // レイヤー名から#を取ってkey名にする
-      // #から、?までの部分をkey名と見なす
+      // Извлекаем ключ из имени слоя
       const key = textNode.name.split('?')[0].replace(/^#/, '')
 
-      // key名を使ってkeyValuesからオブジェクトを検索する
+      // Ищем соответствующий объект в keyValues
       const matchedKeyValue = keyValues.find(keyValue => {
         return keyValue.key === key
       })
 
-      // ハイライト用のrectを作る（レイヤーが表示されているものだけ）
+      // Создаем прямоугольник подсветки (только для видимых слоев)
       if (textNode.absoluteRenderBounds) {
-        // rectを作って、サイズとかstrokeとか設定
+        // Создаем и настраиваем прямоугольник
         const rect = figma.createRectangle()
         rect.x = textNode.absoluteRenderBounds.x
         rect.y = textNode.absoluteRenderBounds.y
@@ -70,47 +70,47 @@ async function createHighlightRectOnPage(
           textNode.absoluteRenderBounds.height,
         )
 
-        // keyValueオブジェクトが見つかったら、rectを青で塗りつぶす
+        // Если найден соответствующий keyValue, заливаем прямоугольник синим
         if (matchedKeyValue) {
           rect.fills = [figma.util.solidPaint({ r: 0, g: 0, b: 1, a: 0.3 })]
           rect.name = `⭕️ ${textNode.name}`
-          // correctRectNodes配列にrectを追加
+          // Добавляем прямоугольник в массив correctRectNodes
           correctRectNodes.push(rect)
         }
-        // keyValueオブジェクトが見つからない場合
-        // （レイヤー名は#で始まっているがkeyが間違っている場合）は、rectを赤で塗りつぶす
+        // Если соответствующий keyValue не найден, заливаем прямоугольник красным
         else {
           rect.fills = [figma.util.solidPaint({ r: 1, g: 0, b: 0, a: 0.3 })]
           rect.name = `❌ ${textNode.name}`
-          // incorrectRectNodes配列にrectを追加
+          // Добавляем прямоугольник в массив incorrectRectNodes
           incorrectRectNodes.push(rect)
         }
       }
     }),
   )
 
-  // correctRectNodesとincorrectRectNodesをrectNodesにマージする
+  // Объединяем correctRectNodes и incorrectRectNodes в rectNodes
   rectNodes = [...correctRectNodes, ...incorrectRectNodes]
   console.log('rectNodes', rectNodes)
 
   if (rectNodes.length > 0) {
-    // rectNodeが1つ以上ある場合、rectをグルーピングする
+    // Если есть прямоугольники, группируем их
     const group = figma.group(rectNodes, figma.currentPage)
 
-    // グループをリネーム
+    // Переименовываем группу
     group.name = `${rectNodes.length} Highlights (⭕️ ${correctRectNodes.length} / ❌ ${incorrectRectNodes.length}) - Generated with Sync Text with Notion`
 
-    // グループをロック
+    // Блокируем группу
     group.locked = true
 
-    // グループを折りたたむ
+    // Сворачиваем группу
     group.expanded = false
 
-    // 生成したgroupのidをcurrentPageのgeneratedGroupIdに保存する
+    // Сохраняем id созданной группы в плагинных данных страницы
     pageNode.setPluginData(GROUP_ID_KEY, group.id)
   }
 }
 
+// Основная функция подсветки текста
 export default async function highlightText(
   keyValues: NotionKeyValue[],
   options: {
@@ -121,30 +121,30 @@ export default async function highlightText(
 ) {
   console.log('highlightText', keyValues, options)
 
-  // targetTextRangeに応じて処理を分岐
+  // Обрабатываем в зависимости от targetTextRange
   if (options.targetTextRange === 'allPages') {
     for (const page of figma.root.children) {
-      // まず対象のpageNodeに移動
+      // Переходим на целевую страницу
       await figma.setCurrentPageAsync(page)
 
-      // そのページ内のtextNodeを取得
+      // Получаем текстовые узлы на этой странице
       const textNodes = await getTextNodes({
         targetTextRange: 'currentPage',
         includeComponents: options.includeComponents,
         includeInstances: options.includeInstances,
       })
 
-      // ハイライトを実行
+      // Выполняем подсветку
       await createHighlightRectOnPage(keyValues, textNodes, page)
     }
   } else {
-    // targetTextRangeにもとづいてtextNodeを取得
+    // Получаем текстовые узлы на основе targetTextRange
     const textNodes = await getTextNodes(options)
 
-    // ハイライトを実行
+    // Выполняем подсветку
     await createHighlightRectOnPage(keyValues, textNodes, figma.currentPage)
   }
 
-  // 完了通知
+  // Отображаем уведомление о завершении
   figma.notify(i18n.t('notifications.highlightText.finish'))
 }
