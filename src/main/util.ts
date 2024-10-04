@@ -5,32 +5,32 @@ import i18n from '@/i18n/main'
 
 import type { TargetTextRange } from '@/types/common'
 
-// nodeの親がコンポーネント or Variantsかどうかを返す再帰関数
+// Рекурсивная функция, проверяющая, является ли родитель узла компонентом или вариантом
 export function getIsNodeParentComponentOrVariants(node: SceneNode) {
-  // 親要素がなかったらfalseを返す
+  // Если нет родителя, возвращаем false
   if (!node.parent) {
     return false
   }
-  // 親がpage or documentならfalseを返す
+  // Если родитель - страница или документ, возвращаем false
   if (node.parent.type === 'PAGE' || node.parent.type === 'DOCUMENT') {
     return false
   }
-  // 親要素のtypeがCOMPONENT || COMPONENT_SETならtrueを返す
+  // Если тип родителя COMPONENT или COMPONENT_SET, возвращаем true
   if (
     node.parent.type === 'COMPONENT' ||
     node.parent.type === 'COMPONENT_SET'
   ) {
     return true
   }
-  // ↑のどれにも当てはまらなかったら親要素を対象にして関数実行
+  // Если ни одно из условий не выполнено, рекурсивно вызываем функцию для родителя
   return getIsNodeParentComponentOrVariants(node.parent)
 }
 
-// nodeのidから先祖インスタンスの配列を返す関数（自分は含まない）
+// Функция, возвращающая массив предков-экземпляров узла по его id (не включая сам узел)
 export function getAncestorInstances(node: SceneNode) {
   const instanceArray: InstanceNode[] = []
 
-  // idをセミコロンで区切って配列にしたもの
+  // Разделяем id по точке с запятой
   const idArray = node.id.split(';')
 
   idArray.map((id, i) => {
@@ -38,7 +38,7 @@ export function getAncestorInstances(node: SceneNode) {
       return
     }
 
-    // indexに応じてidを加工
+    // Формируем targetId в зависимости от индекса
     let targetId = ''
     if (i === 0) {
       targetId = idArray[i]
@@ -48,7 +48,7 @@ export function getAncestorInstances(node: SceneNode) {
       targetId = arr.join(';')
     }
 
-    // 加工したidを元にインスタンスを検索
+    // Ищем экземпляр по сформированному id
     const instance = figma.getNodeById(targetId) as InstanceNode
 
     instanceArray.push(instance)
@@ -57,7 +57,7 @@ export function getAncestorInstances(node: SceneNode) {
   return instanceArray
 }
 
-// textNodesをフィルタリングする関数
+// Функция для фильтрации текстовых узлов
 function filterTextNodes(
   textNodes: TextNode[],
   options: {
@@ -65,11 +65,10 @@ function filterTextNodes(
     includeInstances: boolean
   },
 ) {
-  // 削除予定のtextNodeを格納する配列
+  // Массив для хранения текстовых узлов, которые нужно удалить
   let textNodesToRemove: TextNode[] = []
 
-  // includeComponentsがfalse
-  // → コンポーネントまたはバリアントの子要素をtextNodesToRemoveに追加
+  // Если includeComponents false, добавляем дочерние элементы компонентов или вариантов в textNodesToRemove
   if (!options.includeComponents) {
     textNodes.forEach(textNode => {
       console.log(
@@ -87,8 +86,7 @@ function filterTextNodes(
     })
   }
 
-  // includeInstances
-  // → インスタンスの子要素をtextNodesToRemoveに追加
+  // Если includeInstances false, добавляем дочерние элементы экземпляров в textNodesToRemove
   if (!options.includeInstances) {
     console.log('textNodes', textNodes)
     textNodes.forEach(textNode => {
@@ -102,23 +100,23 @@ function filterTextNodes(
     })
   }
 
-  // textNodesToRemoveから重複を削除
+  // Удаляем дубликаты из textNodesToRemove
   textNodesToRemove = uniqBy(textNodesToRemove, 'id')
 
   console.log('textNodesToRemove', textNodesToRemove)
 
-  // textNodesからtextNodesToRemoveにある要素を削除
+  // Удаляем элементы из textNodes, которые есть в textNodesToRemove
   const filteredTextNodes = textNodes.filter(textNode => {
     return !textNodesToRemove.some(
       textNodeToRemove => textNodeToRemove.id === textNode.id,
     )
   })
 
-  // filteredTextNodesを返す
+  // Возвращаем отфильтрованные текстовые узлы
   return filteredTextNodes
 }
 
-// targetTextRangeに応じてtextNodeを取得する関数
+// Функция для получения текстовых узлов в зависимости от targetTextRange
 export async function getTextNodes(options: {
   targetTextRange: TargetTextRange
   includeComponents: boolean
@@ -126,41 +124,41 @@ export async function getTextNodes(options: {
 }) {
   console.log('getTextNodes', options.targetTextRange, options)
 
-  // textNodeを格納する配列を用意
+  // Массив для хранения текстовых узлов
   let textNodes: TextNode[] = []
 
   if (options.targetTextRange === 'currentPage') {
-    // ページを読み込む
+    // Загружаем текущую страницу
     await figma.currentPage.loadAsync()
 
-    // targetTextRangeに応じてtextNodeを検索、配列に追加
+    // Ищем все текстовые узлы на текущей странице
     textNodes = figma.currentPage.findAllWithCriteria({ types: ['TEXT'] })
   } else if (options.targetTextRange === 'allPages') {
-    // 各ページごとに処理を実行
+    // Обрабатываем каждую страницу
     for (const page of figma.root.children) {
-      // ページを読み込む
+      // Загружаем страницу
       await page.loadAsync()
 
-      // ページは以下にあるすべてのテキストをtextNodesに追加
+      // Добавляем все текстовые узлы со страницы в textNodes
       textNodes = [
         ...textNodes,
         ...page.findAllWithCriteria({ types: ['TEXT'] }),
       ]
     }
   } else if (options.targetTextRange === 'selection') {
-    // 何も選択していない場合は処理を終了
+    // Если ничего не выбрано, завершаем выполнение
     if (figma.currentPage.selection.length === 0) {
       figma.notify(i18n.t('notifications.main.noSelections'))
       return textNodes
     }
 
     figma.currentPage.selection.forEach(node => {
-      // 要素がテキストの場合、textNodesに追加
+      // Если узел - текст, добавляем его в textNodes
       if (node.type === 'TEXT') {
         textNodes.push(node)
       }
 
-      // 要素がグループ、フレーム、コンポーネント、インスタンスなら、要素内のすべてのテキストをtextNodesに追加
+      // Если узел - группа, фрейм, компонент, набор компонентов или экземпляр, добавляем все текстовые узлы внутри него
       else if (
         node.type === 'GROUP' ||
         node.type === 'FRAME' ||
@@ -174,12 +172,12 @@ export async function getTextNodes(options: {
         ]
       }
 
-      // それ以外の場合は何もしない
+      // Для остальных типов узлов ничего не делаем
       // else {}
     })
   }
 
-  // includeComponentsがfalse、またはincludeInstancesがfalseの場合、filterTextNodesを実行
+  // Если includeComponents или includeInstances false, фильтруем текстовые узлы
   if (!options.includeComponents || !options.includeInstances) {
     textNodes = filterTextNodes(textNodes, {
       includeComponents: options.includeComponents,
