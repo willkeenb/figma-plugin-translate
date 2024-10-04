@@ -37,91 +37,103 @@ import type {
 } from '@/types/eventHandler'
 
 export default async function () {
-  // set relaunch button
+  // Устанавливаем кнопку перезапуска
   setRelaunchButton(figma.root, 'open')
 
-  // show ui
+  // Показываем пользовательский интерфейс
   showUI({
     width: DEFAULT_WIDTH,
     height: 0,
   })
 
-  // register event handlers
+  // Регистрируем обработчики событий
+
+  // Загрузка настроек из UI
   on<LoadOptionsFromUIHandler>('LOAD_OPTIONS_FROM_UI', async () => {
     const options = await loadSettingsAsync<Options>(
       DEFAULT_OPTIONS,
       SETTINGS_KEY,
     )
 
-    // main側の言語を切り替え
+    // Меняем язык на стороне main
     await i18n.changeLanguage(options.pluginLanguage)
     console.log('language in main updated.', options.pluginLanguage, i18n)
 
-    // uiにoptionsを送る
+    // Отправляем настройки в UI
     emit<LoadOptionsFromMainHandler>('LOAD_OPTIONS_FROM_MAIN', options)
   })
 
+  // Сохранение настроек
   on<SaveOptionsHandler>('SAVE_OPTIONS', async options => {
     await saveSettingsAsync<Options>(options, SETTINGS_KEY)
   })
 
+  // Отображение уведомлений
   on<NotifyHandler>('NOTIFY', options => {
     figma.notify(options.message, options.options)
   })
 
+  // Изменение размера окна
   on<ResizeWindowHandler>('RESIZE_WINDOW', windowSize => {
     figma.ui.resize(windowSize.width, windowSize.height)
   })
 
+  // Загрузка кэша из UI
   on<LoadCacheFromUIHandler>('LOAD_CACHE_FROM_UI', async () => {
     let cache: NotionKeyValue[]
 
-    // キャッシュのデータをDodumentから取得
+    // Получаем данные кэша из Document
     const data = figma.root.getPluginData(CACHE_KEY)
 
-    // データがあったらパース、無かったら空配列を返す
+    // Если данные есть, парсим их, иначе возвращаем пустой массив
     if (data) {
       cache = JSON.parse(data)
     } else {
       cache = []
     }
 
-    // UIに送る
+    // Отправляем кэш в UI
     emit<LoadCacheFromMainHandler>('LOAD_CACHE_FROM_MAIN', cache)
   })
 
+  // Сохранение кэша
   on<SaveCacheHandler>('SAVE_CACHE', keyValues => {
-    // まずすでにあるキャッシュを削除
+    // Сначала удаляем существующий кэш
     figma.root.setPluginData(CACHE_KEY, '')
 
-    // キャッシュをDocumentに保存
+    // Сохраняем кэш в Document
     figma.root.setPluginData(CACHE_KEY, JSON.stringify(keyValues))
 
     console.log('save cache success', keyValues)
   })
 
+  // Применение ключ-значение
   on<ApplyKeyValueHandler>('APPLY_KEY_VALUE', keyValue => {
     applyKeyValue(keyValue)
   })
 
+  // Применение значения
   on<ApplyValueHandler>('APPLY_VALUE', (keyValues, options) => {
     applyValue(keyValues, options)
   })
 
+  // Переименование слоя
   on<RenameLayerHandler>('RENAME_LAYER', (keyValues, options) => {
     renameLayer(keyValues, options)
   })
 
+  // Подсветка текста
   on<HighlightTextHandler>('HIGHLIGHT_TEXT', (keyValues, options) => {
     highlightText(keyValues, options)
   })
 
+  // Изменение языка
   on<ChangeLanguageHandler>('CHANGE_LANGUAGE', async (language, options) => {
-    // main側の言語を切り替え
+    // Меняем язык на стороне main
     await i18n.changeLanguage(language)
     console.log('language in main updated.', language, i18n)
 
-    // options.notifyがtrueの場合は完了通知
+    // Если options.notify true, отображаем уведомление о завершении
     if (options?.notify) {
       figma.notify(i18n.t('notifications.Settings.updateLanguage'))
     }
