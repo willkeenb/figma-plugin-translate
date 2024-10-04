@@ -1,35 +1,43 @@
+// Импорт типов из файла database
 import type { DatabaseOptionId, ValuePropertyName } from './database'
 
+// Определение возможных ключей вкладок
 export type SelectedTabKey = 'fetch' | 'list' | 'utilities' | 'settings'
+
+// Определение возможных значений вкладок
 export type SelectedTabValue = 'Fetch' | 'List' | 'Utilities' | 'Settings'
 
+// Типы для сортировки
 export type SortValue = 'key' | 'value' | 'created_time' | 'last_edited_time'
-
 export type SortOrder = 'ascending' | 'descending'
 
+// Диапазон текста для операций
 export type TargetTextRange = 'selection' | 'currentPage' | 'allPages'
 
+// Поддерживаемые языки плагина
 export type PluginLanguage = 'en' | 'ja' | 'ru'
 
+// Основные настройки плагина
 export type Options = {
-  // fetch
+  // Настройки для вкладки fetch
   selectedTabKey: SelectedTabKey
   selectedDatabaseId: DatabaseOptionId
   valuePropertyName: ValuePropertyName
-  // list
+  // Настройки для вкладки list
   filterString: string
   sortValue: SortValue
   sortOrder: SortOrder
   selectedRowId: string | null
   scrollPosition: number
-  // utilities
+  // Настройки для вкладки utilities
   targetTextRange: TargetTextRange
   includeComponents: boolean
   includeInstances: boolean
-  // settings
+  // Настройки для вкладки settings
   pluginLanguage: PluginLanguage
 }
 
+// Типы для работы с данными Notion
 export type NotionTitle = {
   type: 'title'
   title: { plain_text: string }[]
@@ -67,4 +75,5 @@ export type NotionKeyValue = {
   url: string
 }
 
+// Реэкспорт типа из файла database
 export type { DatabaseOptionId }

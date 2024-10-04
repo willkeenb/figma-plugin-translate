@@ -1,5 +1,6 @@
 import type { defaultNS, resources } from '@/ui/i18n'
 
+// Расширение типов для библиотеки i18next
 declare module 'i18next' {
   interface CustomTypeOptions {
     returnNull: false
