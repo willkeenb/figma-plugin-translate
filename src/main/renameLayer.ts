@@ -5,6 +5,7 @@ import { getTextNodes } from '@/main/util'
 
 import type { NotionKeyValue, TargetTextRange } from '@/types/common'
 
+// Функция для переименования слоев
 export default async function renameLayer(
   keyValues: NotionKeyValue[],
   options: {
@@ -15,14 +16,14 @@ export default async function renameLayer(
 ) {
   console.log('renameLayer', keyValues, options)
 
-  // textNodeを取得
+  // Получение текстовых узлов
   const textNodes = await getTextNodes(options)
 
   console.log('textNodes', textNodes)
 
-  // textNodeが1つもなかったら処理を終了
+  // Если текстовых узлов нет, завершаем выполнение
   if (textNodes.length === 0) {
-    // 選択状態によってトーストを出し分け
+    // Отображение уведомления в зависимости от выбранного диапазона
     if (options.targetTextRange === 'selection') {
       figma.notify(i18n.t('notifications.main.noTextInSelection'))
     } else if (options.targetTextRange === 'currentPage') {
@@ -34,24 +35,24 @@ export default async function renameLayer(
     return
   }
 
-  // 事前にフォントをロード
+  // Предварительная загрузка шрифтов
   await loadFontsAsync(textNodes).catch((error: Error) => {
     const errorMessage = i18n.t('notifications.main.errorLoadFonts')
     figma.notify(errorMessage, { error: true })
     throw new Error(errorMessage)
   })
 
-  // keyValuesのvalueをキーとするマップを作成
+  // Создание карты, где ключ - значение, а значение - объект KeyValue
   const valueKeyMap = new Map(
     keyValues.map(keyValue => [keyValue.value, keyValue]),
   )
 
-  // textNodesごとに処理を実行
+  // Обработка каждого текстового узла
   textNodes.forEach(textNode => {
-    // keyValuesからvalueがtextNode.charactersと一致するものを探す
+    // Поиск соответствующего KeyValue для текущего текстового узла
     const matchedKeyValue = valueKeyMap.get(textNode.characters)
 
-    // matchedKeyValueがある場合、keyをtextNodeのレイヤー名にする
+    // Если найдено соответствие, переименовываем слой
     if (matchedKeyValue) {
       console.log('matchedKeyValue exist', textNode.characters, matchedKeyValue)
       textNode.name = `#${matchedKeyValue.key}`
@@ -60,6 +61,6 @@ export default async function renameLayer(
     }
   })
 
-  // 完了通知
+  // Уведомление о завершении
   figma.notify(i18n.t('notifications.renameLayer.finish'))
 }
