@@ -25,6 +25,7 @@ type RowProps = {
   selected: boolean
 }
 
+// Компонент кнопки копирования
 function CopyButton({
   type,
   title,
@@ -37,23 +38,22 @@ function CopyButton({
   const { getKeyWithQueryStrings } = useNotionKeyValue()
 
   function handleClick(event: JSX.TargetedMouseEvent<HTMLButtonElement>) {
-    // 親要素へのバブリングを止める
+    // Предотвращаем всплытие события
     event.stopPropagation()
 
     let copyValue = ''
 
-    // typeがkeyの場合
+    // Определяем, что копировать: ключ или значение
     if (type === 'key') {
       copyValue = getKeyWithQueryStrings(keyValue)
-    }
-    // typeがvalueの場合
-    else if (type === 'value') {
+    } else if (type === 'value') {
       copyValue = keyValue.value
     }
 
     copyToClipboard(copyValue)
     console.log('copied', copyValue)
 
+    // Отправляем уведомление о копировании
     emit<NotifyHandler>('NOTIFY', {
       message: t('notifications.KeyValueRow.copy', { title }),
     })
@@ -76,12 +76,13 @@ function CopyButton({
   )
 }
 
+// Основной компонент строки ключ-значение
 export default function KeyValueRow({ keyValue, onClick, selected }: RowProps) {
   const { t } = useTranslation()
   const { getKeyWithQueryStrings } = useNotionKeyValue()
 
+  // Обработчик клика по кнопке "Apply"
   function handleApplyClick(event: JSX.TargetedMouseEvent<HTMLButtonElement>) {
-    // 親要素へのバブリングを止める
     event.stopPropagation()
 
     const applyKeyValue: NotionKeyValue = {
@@ -93,11 +94,11 @@ export default function KeyValueRow({ keyValue, onClick, selected }: RowProps) {
     emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
   }
 
+  // Обработчик клика по кнопке "Open in browser"
   function handleOpenClick(event: JSX.TargetedMouseEvent<HTMLButtonElement>) {
-    // 親要素へのバブリングを止める
     event.stopPropagation()
 
-    // ブラウザでkeyValue.urlを開く
+    // Открываем URL в новой вкладке
     window.open(keyValue.url, '_blank', 'noopener, noreferrer')
   }
 
@@ -109,7 +110,7 @@ export default function KeyValueRow({ keyValue, onClick, selected }: RowProps) {
       )}
       onClick={() => onClick(keyValue.id)}
     >
-      {/* key property */}
+      {/* Отображение ключа */}
       <div className="w-full flex">
         <div className="w-10 py-1 text-secondary">{t('KeyValueRow.key')}</div>
         <div
@@ -131,7 +132,7 @@ export default function KeyValueRow({ keyValue, onClick, selected }: RowProps) {
         </div>
       </div>
 
-      {/* value property */}
+      {/* Отображение значения */}
       <div className="w-full flex">
         <div className="w-10 py-1 text-secondary">{t('KeyValueRow.value')}</div>
         <div
@@ -153,6 +154,7 @@ export default function KeyValueRow({ keyValue, onClick, selected }: RowProps) {
         </div>
       </div>
 
+      {/* Дополнительные кнопки для выбранной строки */}
       {selected && (
         <div className="mt-1 flex flex-col gap-1">
           <Button secondary fullWidth onClick={handleApplyClick}>

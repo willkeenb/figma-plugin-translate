@@ -25,13 +25,13 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
   const [tmpScrollPosition, setTmpScrollPosition] = useState(0)
   const [scrollPositionRestored, setScrollPositionRestored] = useState(false)
 
-  // rowをクリックした時に実行する関数
+  // Функция, выполняемая при клике на строку
   const handleRowClick = useCallback(
     (id: string) => {
       console.log('handleRowClick', id, options.selectedRowId)
 
-      // 選択されてなければ選択済みにする
-      // すでに選択済みだったら選択解除
+      // Если не выбрано, выбираем
+      // Если уже выбрано, снимаем выбор
       if (id !== options.selectedRowId) {
         updateOptions({ selectedRowId: id })
       } else {
@@ -41,15 +41,15 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
     [options.selectedRowId],
   )
 
-  // スクロール時にscrollPositionを更新する関数
+  // Функция для обновления позиции прокрутки при скролле
   const handleScroll = useCallback(() => {
     if (listRef.current) {
       setTmpScrollPosition(listRef.current.scrollTop)
     }
   }, [])
 
-  // tmpScrollPositionが更新されたらdebounceさせてからStoreに保存
-  // scrollPositionRestoredがtrueのときだけ
+  // Обновление позиции прокрутки в Store с задержкой
+  // Только когда scrollPositionRestored true
   useDebounce(
     () => {
       if (scrollPositionRestored) {
@@ -69,9 +69,9 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
     console.log('KeyValueList unmounted')
   })
 
-  // rowsが変更されたら
-  // スクロール位置が復元されていない→スクロール位置を復元
-  // スクロール位置が復元済み（フィルター or ソート時）→スクロール位置を0にする
+  // При изменении rows
+  // Если позиция прокрутки не восстановлена → восстанавливаем
+  // Если позиция прокрутки уже восстановлена (при фильтрации или сортировке) → сбрасываем на 0
   useUpdateEffect(() => {
     console.log(
       'rows updated',
@@ -98,7 +98,7 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
     }
   }, [rows])
 
-  // rowsが変更される度にイベントリスナを再設定
+  // Переустановка слушателя событий при изменении rows
   useUpdateEffect(() => {
     const listElement = listRef.current
 
@@ -127,13 +127,13 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
           ))}
         </ul>
       ) : (
-        // empty
+        // Пустой список
         <div className="h-full flex flex-col items-center justify-center text-secondary">
           {t('KeyValueList.empty')}
         </div>
       )}
 
-      {/* loading */}
+      {/* Индикатор загрузки */}
       {!scrollPositionRestored && (
         <div className="absolute inset-0 z-10 bg-primary flex flex-col items-center justify-center text-secondary">
           {t('KeyValueList.loading')}

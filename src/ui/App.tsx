@@ -33,6 +33,7 @@ export default function App() {
   const [selectedTabValue, setSelectedTabValue] =
     useState<SelectedTabValue>('Fetch')
 
+  // Определение опций для вкладок
   const tabOptions: TabsOption[] &
     {
       value: SelectedTabValue
@@ -55,6 +56,7 @@ export default function App() {
     },
   ]
 
+  // Обработчик изменения вкладки
   function handleTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const newTabValue = event.currentTarget.value as SelectedTabValue
     let newTabKey: SelectedTabKey = 'list'
@@ -74,48 +76,50 @@ export default function App() {
     })
   }
 
+  // Эффект при монтировании компонента
   useMount(async () => {
     console.log('App mounted start')
 
-    // 設定をclientStorageから取得
+    // Загрузка настроек из clientStorage
     await loadOptionsFromClientStorage()
 
-    // keyValuesのキャッシュをドキュメントから取得
+    // Загрузка кэша keyValues из документа
     await loadCacheFromDocument()
 
-    // マウント完了
+    // Завершение монтирования
     console.log('App mounted done')
     setMounted(true)
 
     resizeWindow()
   })
 
+  // Эффект при размонтировании компонента
   useUnmount(() => {
     console.log('App unmounted')
   })
 
-  // UI側で設定が更新されたら設定をアップデート
+  // Эффект при обновлении настроек
   useUpdateEffect(() => {
     saveOptionsToClientStorage(options)
   }, [options])
 
-  // selectedTab(key)がアップデートされたらselectedTabValueをアップデート
+  // Эффект при обновлении выбранной вкладки
   useUpdateEffect(() => {
     const translatedTabValue = t(`Tabs.${options.selectedTabKey}` as const)
     setSelectedTabValue(translatedTabValue as SelectedTabValue)
   }, [options.selectedTabKey])
 
-  // options.pluginLanguageが変更されたら言語を切り替え
+  // Эффект при изменении языка плагина
   useUpdateEffect(async () => {
     console.log('pluginLanguage update on App', options.pluginLanguage)
 
-    // UI側の言語を切り替え
+    // Смена языка UI
     await i18n.changeLanguage(options.pluginLanguage)
 
-    // main側の言語も切り替える
+    // Смена языка в основной части плагина
     emit<ChangeLanguageHandler>('CHANGE_LANGUAGE', options.pluginLanguage)
 
-    // selectedTabValueを言語に合わせてアップデート
+    // Обновление значения выбранной вкладки в соответствии с новым языком
     const translatedTabValue = t(`Tabs.${options.selectedTabKey}` as const)
     setSelectedTabValue(translatedTabValue as SelectedTabValue)
   }, [options.pluginLanguage])

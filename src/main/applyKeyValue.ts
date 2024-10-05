@@ -7,18 +7,18 @@ import type { NotionKeyValue } from '@/types/common'
 export default async function applyKeyValue(keyValue: NotionKeyValue) {
   console.log('applyKeyValue', keyValue)
 
-  // 何も選択していない場合は処理を終了
+  // Если ничего не выбрано, завершаем выполнение
   if (figma.currentPage.selection.length === 0) {
     figma.notify(i18n.t('notifications.main.noSelections'))
     return
   }
 
-  // textNodeを格納する配列を用意
+  // Массив для хранения текстовых узлов
   const textNodes: TextNode[] = []
 
-  // 選択要素ごとに処理を実行
+  // Обрабатываем каждый выбранный элемент
   figma.currentPage.selection.forEach(node => {
-    // 要素がテキストの場合、textNodesに追加
+    // Если элемент является текстовым, добавляем его в textNodes
     if (node.type === 'TEXT') {
       textNodes.push(node)
     }
@@ -26,29 +26,29 @@ export default async function applyKeyValue(keyValue: NotionKeyValue) {
 
   console.log('textNodes', textNodes)
 
-  // textNodeが1つも無かったら処理を中断
+  // Если текстовых узлов нет, прерываем выполнение
   if (textNodes.length === 0) {
     figma.notify(i18n.t('notifications.main.noTextInSelection'))
     return
   }
 
-  // 事前にフォントをロード
+  // Предварительно загружаем шрифты
   await loadFontsAsync(textNodes).catch((error: Error) => {
     const errorMessage = i18n.t('notifications.main.errorLoadFonts')
     figma.notify(errorMessage, { error: true })
     throw new Error(errorMessage)
   })
 
-  // textNodeごとに処理を実行
+  // Обрабатываем каждый текстовый узел
   textNodes.forEach(textNode => {
-    // レイヤー名をkeyPropertyにする
-    // UI側で`#${keyValue.key}?${queryString}`に加工したもの
+    // Устанавливаем имя слоя как ключ
+    // На стороне UI это обрабатывается как `#${keyValue.key}?${queryString}`
     textNode.name = keyValue.key
 
-    // テキスト本文をvaluePropertyにする
+    // Устанавливаем текст узла как значение
     textNode.characters = keyValue.value
   })
 
-  // 完了通知
+  // Отображаем уведомление о завершении
   figma.notify(i18n.t('notifications.applyKeyValue.finish'))
 }

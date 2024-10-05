@@ -33,6 +33,7 @@ export default function Utilities() {
   const { updateOptions } = useOptions()
   const { resizeWindow } = useResizeWindow()
 
+  // Опции для выпадающего списка выбора диапазона текста
   const targetTextRangeDropdownOptions: DropdownOption[] &
     {
       value?: TargetTextRange
@@ -51,6 +52,7 @@ export default function Utilities() {
     },
   ]
 
+  // Обработчик изменения выбранного диапазона текста
   function handleTextRangeDropdownChange(
     event: JSX.TargetedEvent<HTMLInputElement>,
   ) {
@@ -59,6 +61,7 @@ export default function Utilities() {
     })
   }
 
+  // Обработчик изменения чекбоксов
   function handleCheckboxClick(
     option: 'includeComponents' | 'includeInstances',
   ) {
@@ -77,6 +80,7 @@ export default function Utilities() {
     }
   }
 
+  // Обработчик нажатия на кнопки действий
   function handleActionClick(
     action: 'applyValue' | 'renameLayer' | 'highlightText',
   ) {
@@ -99,11 +103,13 @@ export default function Utilities() {
     }
   }
 
+  // Эффект при монтировании компонента
   useMount(() => {
     console.log('Utilities mounted')
     resizeWindow()
   })
 
+  // Эффект при размонтировании компонента
   useUnmount(() => {
     console.log('Utilities unmounted')
   })

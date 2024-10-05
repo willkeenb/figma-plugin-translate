@@ -14,6 +14,7 @@ import type { DatabaseOptionId } from '@/types/database'
 export default function useNotion() {
   const { t } = useTranslation()
 
+  // Функция для получения данных из Notion
   async function fetchNotion(options: {
     integrationToken: string
     selectedDatabaseId: DatabaseOptionId
@@ -24,10 +25,12 @@ export default function useNotion() {
   }) {
     console.log('fetchNotion', options)
 
+    // Проверка наличия выбранной базы данных
     if (!options.selectedDatabaseId) {
       throw new Error(t('notifications.Fetch.error.noDatabaseSelected'));
     }
 
+    // Проверка корректности выбранной базы данных
     const selectedDatabase = DATABASE_OPTIONS.find(db => db.id === options.selectedDatabaseId);
     if (!selectedDatabase) {
       throw new Error(t('notifications.Fetch.error.invalidDatabase'));
@@ -35,6 +38,7 @@ export default function useNotion() {
 
     const databaseId = selectedDatabase.id
 
+    // Формирование URL для запроса к API Notion
     const apiUrl = `https://api.notion.com/v1/databases/${options.selectedDatabaseId}/query`;
     const fullUrl = `${PROXY_URL}/${encodeURIComponent(apiUrl)}`;
 
@@ -47,6 +51,7 @@ export default function useNotion() {
       console.log('Sending request to:', fullUrl);
       console.log('Request params:', reqParams);
 
+      // Отправка запроса к API Notion
       const response = await fetch(fullUrl, {
         method: 'POST',
         headers: {
@@ -57,6 +62,7 @@ export default function useNotion() {
         body: JSON.stringify(reqParams),
       })
 
+      // Обработка ошибок ответа
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Notion API error:', errorText);
@@ -67,12 +73,14 @@ export default function useNotion() {
       console.log('Response:', resJson)
       const pages = resJson.results as NotionPage[]
 
-
+      // Проверка наличия страниц в ответе
       if (!pages || pages.length === 0) {
         throw new Error(t('notifications.Fetch.error.noPages'))
       }
 
+      // Обработка каждой страницы
       pages.forEach(row => {
+        // Проверка наличия и типа свойств ключа и значения
         if (!row.properties[options.keyPropertyName]) {
           throw new Error(t('notifications.Fetch.error.wrongKeyName'))
         }
@@ -101,6 +109,7 @@ export default function useNotion() {
         }
         const value = getPropertyValue(valueProperty)
 
+        // Добавление обработанных данных в массив
         options.keyValuesArray.push({
           id: row.id,
           key,
@@ -111,6 +120,7 @@ export default function useNotion() {
         })
       })
 
+      // Рекурсивный вызов для получения следующей страницы результатов
       if (resJson.has_more) {
         await fetchNotion({ ...options, nextCursor: resJson.next_cursor })
       }
@@ -120,6 +130,7 @@ export default function useNotion() {
     }
   }
 
+  // Вспомогательная функция для извлечения значения свойства
   function getPropertyValue(
     property: NotionTitle | NotionFomula | NotionRichText,
   ): string {

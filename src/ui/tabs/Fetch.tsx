@@ -37,6 +37,7 @@ export default function Fetch() {
   const [fetching, setFetching] = useState(false)
   const keyValuesRef = useRef<NotionKeyValue[]>([])
 
+  // Создание опций для выпадающего списка баз данных
   const databaseDropdownOptions = useMemo<DropdownOption[]>(() => 
     DATABASE_OPTIONS.map(option => ({
       text: t(option.labelKey),
@@ -44,6 +45,7 @@ export default function Fetch() {
     }))
   , [t])
 
+  // Создание опций для выпадающего списка свойств значений
   const valuePropertyOptions = useMemo<DropdownOption[]>(() => 
     VALUE_PROPERTY_OPTIONS.map(option => ({
       text: t(option.labelKey),
@@ -51,12 +53,13 @@ export default function Fetch() {
     }))
   , [t])
 
-  
+  // Обработчик изменения свойства значения
   const handleValuePropertyChange = useCallback((event: JSX.TargetedEvent<HTMLInputElement>) => {
     const newValue = event.currentTarget.value as ValuePropertyName
     updateOptions({ valuePropertyName: newValue })
   }, [updateOptions])
 
+  // Обработчик изменения ввода
   const handleInput = useCallback((key: keyof Options) => {
     return (event: JSX.TargetedEvent<HTMLInputElement>) => {
       updateOptions({
@@ -65,12 +68,14 @@ export default function Fetch() {
     }
   }, [updateOptions])
 
+  // Обработчик изменения базы данных
   const handleDatabaseChange = useCallback((event: JSX.TargetedEvent<HTMLInputElement>) => {
     const newDatabaseId = event.currentTarget.value as DatabaseOptionId
     console.log('New database selected:', newDatabaseId)
     updateOptions({ selectedDatabaseId: newDatabaseId })
   }, [updateOptions])
 
+  // Обработчик нажатия кнопки "Fetch"
   const handleFetchClick = useCallback(async () => {
     setFetching(true)
 
@@ -120,6 +125,7 @@ export default function Fetch() {
     }
   }, [options.selectedDatabaseId, options.valuePropertyName, fetchNotion, saveCacheToDocument, t])
 
+  // Обработчик нажатия кнопки "Clear"
   const handleClearClick = useCallback(() => {
     console.log('handleClearClick')
     useKeyValuesStore.setState({ keyValues: [] })
@@ -129,11 +135,13 @@ export default function Fetch() {
     })
   }, [saveCacheToDocument, t])
 
+  // Эффект при монтировании компонента
   useMount(() => {
     console.log('Fetch mounted')
     resizeWindow()
   })
 
+  // Эффект при размонтировании компонента
   useUnmount(() => {
     console.log('Fetch unmounted')
   })

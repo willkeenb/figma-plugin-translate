@@ -26,6 +26,7 @@ export default function Settings() {
   const { updateOptions } = useOptions()
   const { resizeWindow } = useResizeWindow()
 
+  // Опции для выпадающего списка выбора языка
   const languageDropdownOptions: DropdownOption[] &
     {
       value?: PluginLanguage
@@ -44,27 +45,30 @@ export default function Settings() {
     },
   ]
 
+  // Обработчик изменения языка
   async function handleLanguageDropdownChange(
     event: JSX.TargetedEvent<HTMLInputElement>,
   ) {
     const newLanguage = event.currentTarget.value as PluginLanguage
 
-    // pluginLanguageをアップデート
+    // Обновление языка плагина в настройках
     updateOptions({
       pluginLanguage: newLanguage,
     })
 
-    // 言語切替
+    // Отправка события для смены языка
     emit<ChangeLanguageHandler>('CHANGE_LANGUAGE', newLanguage, {
       notify: true,
     })
   }
 
+  // Эффект при монтировании компонента
   useMount(() => {
     console.log('Settings mounted')
     resizeWindow()
   })
 
+  // Эффект при размонтировании компонента
   useUnmount(() => {
     console.log('Settings unmounted')
   })

@@ -16,14 +16,14 @@ export default async function applyValue(
 ) {
   console.log('applyValue', keyValues, options)
 
-  // textNodeを取得
+  // Получаем текстовые узлы
   const textNodes = await getTextNodes(options)
 
   console.log('textNodes', textNodes)
 
-  // textNodeが1つもなかったら処理を終了
+  // Если текстовых узлов нет, завершаем выполнение
   if (textNodes.length === 0) {
-    // 選択状態によってトーストを出し分け
+    // Отображаем уведомление в зависимости от выбранного диапазона
     if (options.targetTextRange === 'selection') {
       figma.notify(i18n.t('notifications.main.noTextInSelection'))
     } else if (options.targetTextRange === 'currentPage') {
@@ -35,34 +35,32 @@ export default async function applyValue(
     return
   }
 
-  // matchedTextNodesを格納する配列を用意
+  // Массив для хранения подходящих текстовых узлов
   let matchedTextNodes: TextNode[] = []
 
-  // textNodeの中からレイヤー名が#で始まるものだけを探してmatchedTextNodesに追加
+  // Фильтруем текстовые узлы, оставляя только те, чье имя начинается с #
   matchedTextNodes = textNodes.filter(textNode => {
     return textNode.name.startsWith('#')
   })
 
   console.log('matchedTextNodes', matchedTextNodes)
 
-  // matchedTextNodesが空なら処理を終了
+  // Если нет подходящих текстовых узлов, завершаем выполнение
   if (matchedTextNodes.length === 0) {
     figma.notify(i18n.t('notifications.applyValue.noMatchingText'))
     return
   }
 
-  // 事前にフォントをロード
+  // Предварительно загружаем шрифты
   await loadFontsAsync(matchedTextNodes).catch((error: Error) => {
     const errorMessage = i18n.t('notifications.main.errorLoadFonts')
     figma.notify(errorMessage, { error: true })
     throw new Error(errorMessage)
   })
 
-  // matchedTextNodesごとに処理を実行
+  // Обрабатываем каждый подходящий текстовый узел
   matchedTextNodes.forEach(textNode => {
-    // クエリパラメータを取得する
-    // ?から後ろの部分をクエリパラメータと見なす
-    // 一部の文字がうまくパースされないので、パース前にエンコードする
+    // Получаем параметры запроса из имени слоя
     const originalParam = textNode.name.split('?')[1] as string | undefined
     let param: ParsedQuery<string>
     if (originalParam) {
@@ -72,39 +70,33 @@ export default async function applyValue(
       param = queryString.parse('')
     }
 
-    // レイヤー名から#を取ってkey名にする
-    // #から、?までの部分をkey名と見なす
+    // Извлекаем ключ из имени слоя
     const key = textNode.name.split('?')[0].replace(/^#/, '')
 
-    // key名を使ってkeyValuesからオブジェクトを検索する
+    // Ищем соответствующий объект в keyValues
     const keyValue = keyValues.find(keyValue => {
       return keyValue.key === key
     })
 
-    // テキストを置換する
-    // keyValueオブジェクトが見つかった場合
+    // Заменяем текст
     if (keyValue) {
       console.log('keyValue found', key)
 
-      // 見つかったkeyValueオブジェクトからvalueを取り出す
       const value = keyValue.value
 
       console.log('value', value)
       console.log('param', param)
 
-      // テキストをvalueに置換
-      // paramがある場合→valueの中の{paramKey}の置き換えを試みる
+      // Если есть параметры, пытаемся заменить {paramKey} в value
       if (Object.keys(param).length) {
-        // valueの中に{paramKey}があるか探す
         const matchedParamKeys = value.match(/(?<=\{).*?(?=\})/g)
 
-        // 無い場合、仕方がないので普通にvalueを入れる
         if (!matchedParamKeys) {
           textNode.characters = value
           return
         }
 
-        // value内にある{paramKey}毎に置換
+        // Заменяем каждый {paramKey} в value
         let replacedValue = value
         matchedParamKeys.forEach(paramKey => {
           replacedValue = replacedValue.replace(
@@ -115,22 +107,21 @@ export default async function applyValue(
           )
         })
 
-        // replacedValueをテキスト本文にする
+        // Устанавливаем заменённое значение как текст узла
         textNode.characters = replacedValue
       }
-      // paramが無い場合→普通にvalueを入れる
+      // Если параметров нет, просто устанавливаем value как текст узла
       else {
         textNode.characters = value
       }
     }
-    // keyValueオブジェクトが見つからなかった場合
+    // Если соответствующий keyValue не найден
     else {
       console.log('keyValue not found', key)
     }
   })
 
-  // 完了通知
-  // 選択状態によってトーストを出し分け
+  // Отображаем уведомление о завершении
   if (options.targetTextRange === 'selection') {
     figma.notify(i18n.t('notifications.applyValue.finishSelection'))
   } else if (options.targetTextRange === 'currentPage') {
