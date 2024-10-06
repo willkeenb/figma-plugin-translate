@@ -19,7 +19,8 @@ export default function useNotion() {
     integrationToken: string
     selectedDatabaseId: DatabaseOptionId
     keyPropertyName: string
-    valuePropertyName: string
+    valuePropertyNameRu: string
+    valuePropertyNameUz: string
     nextCursor?: string
     keyValuesArray: NotionKeyValue[]
   }) {
@@ -80,13 +81,17 @@ export default function useNotion() {
 
       // Обработка каждой страницы
       pages.forEach(row => {
-        // Проверка наличия и типа свойств ключа и значения
+        // Проверка наличия и типа свойств ключа и значений
         if (!row.properties[options.keyPropertyName]) {
           throw new Error(t('notifications.Fetch.error.wrongKeyName'))
         }
 
-        if (!row.properties[options.valuePropertyName]) {
-          throw new Error(t('notifications.Fetch.error.wrongValueName'))
+        if (!row.properties[options.valuePropertyNameRu]) {
+          throw new Error(t('notifications.Fetch.error.wrongValueNameRu'))
+        }
+
+        if (!row.properties[options.valuePropertyNameUz]) {
+          throw new Error(t('notifications.Fetch.error.wrongValueNameUz'))
         }
 
         const keyProperty = row.properties[options.keyPropertyName]
@@ -99,21 +104,31 @@ export default function useNotion() {
         }
         const key = getPropertyValue(keyProperty)
 
-        const valueProperty = row.properties[options.valuePropertyName]
+        const valuePropertyRu = row.properties[options.valuePropertyNameRu]
+        const valuePropertyUz = row.properties[options.valuePropertyNameUz]
         if (
-          valueProperty.type !== 'title' &&
-          valueProperty.type !== 'rich_text' &&
-          valueProperty.type !== 'formula'
+          valuePropertyRu.type !== 'title' &&
+          valuePropertyRu.type !== 'rich_text' &&
+          valuePropertyRu.type !== 'formula'
         ) {
-          throw new Error(t('notifications.Fetch.error.wrongValueType'))
+          throw new Error(t('notifications.Fetch.error.wrongValueTypeRu'))
         }
-        const value = getPropertyValue(valueProperty)
+        if (
+          valuePropertyUz.type !== 'title' &&
+          valuePropertyUz.type !== 'rich_text' &&
+          valuePropertyUz.type !== 'formula'
+        ) {
+          throw new Error(t('notifications.Fetch.error.wrongValueTypeUz'))
+        }
+        const valueRu = getPropertyValue(valuePropertyRu)
+        const valueUz = getPropertyValue(valuePropertyUz)
 
         // Добавление обработанных данных в массив
         options.keyValuesArray.push({
           id: row.id,
           key,
-          value,
+          valueRu,
+          valueUz,
           created_time: row.created_time,
           last_edited_time: row.last_edited_time,
           url: row.url,

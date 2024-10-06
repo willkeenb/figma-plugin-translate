@@ -8,7 +8,7 @@ export type SelectedTabKey = 'fetch' | 'list' | 'utilities' | 'settings'
 export type SelectedTabValue = 'Fetch' | 'List' | 'Utilities' | 'Settings'
 
 // Типы для сортировки
-export type SortValue = 'key' | 'value' | 'created_time' | 'last_edited_time'
+export type SortValue = 'key' | 'valueRu' | 'valueUz' | 'created_time' | 'last_edited_time';
 export type SortOrder = 'ascending' | 'descending'
 
 // Диапазон текста для операций
@@ -19,6 +19,9 @@ export type PluginLanguage = 'en' | 'ja' | 'ru'
 
 // Основные настройки плагина
 export type Options = {
+  [x: string]: any
+  options: any
+  options: any
   // Настройки для вкладки fetch
   selectedTabKey: SelectedTabKey
   selectedDatabaseId: DatabaseOptionId
@@ -69,7 +72,8 @@ export type NotionPage = {
 export type NotionKeyValue = {
   id: string
   key: string
-  value: string
+  valueRu: string
+  valueUz: string
   created_time: string
   last_edited_time: string
   url: string

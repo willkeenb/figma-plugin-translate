@@ -16,14 +16,11 @@ export default async function applyValue(
 ) {
   console.log('applyValue', keyValues, options)
 
-  // Получаем текстовые узлы
   const textNodes = await getTextNodes(options)
 
   console.log('textNodes', textNodes)
 
-  // Если текстовых узлов нет, завершаем выполнение
   if (textNodes.length === 0) {
-    // Отображаем уведомление в зависимости от выбранного диапазона
     if (options.targetTextRange === 'selection') {
       figma.notify(i18n.t('notifications.main.noTextInSelection'))
     } else if (options.targetTextRange === 'currentPage') {
@@ -31,36 +28,29 @@ export default async function applyValue(
     } else if (options.targetTextRange === 'allPages') {
       figma.notify(i18n.t('notifications.main.noTextInAllPages'))
     }
-
     return
   }
 
-  // Массив для хранения подходящих текстовых узлов
   let matchedTextNodes: TextNode[] = []
 
-  // Фильтруем текстовые узлы, оставляя только те, чье имя начинается с #
   matchedTextNodes = textNodes.filter(textNode => {
     return textNode.name.startsWith('#')
   })
 
   console.log('matchedTextNodes', matchedTextNodes)
 
-  // Если нет подходящих текстовых узлов, завершаем выполнение
   if (matchedTextNodes.length === 0) {
     figma.notify(i18n.t('notifications.applyValue.noMatchingText'))
     return
   }
 
-  // Предварительно загружаем шрифты
   await loadFontsAsync(matchedTextNodes).catch((error: Error) => {
     const errorMessage = i18n.t('notifications.main.errorLoadFonts')
     figma.notify(errorMessage, { error: true })
     throw new Error(errorMessage)
   })
 
-  // Обрабатываем каждый подходящий текстовый узел
   matchedTextNodes.forEach(textNode => {
-    // Получаем параметры запроса из имени слоя
     const originalParam = textNode.name.split('?')[1] as string | undefined
     let param: ParsedQuery<string>
     if (originalParam) {
@@ -70,24 +60,20 @@ export default async function applyValue(
       param = queryString.parse('')
     }
 
-    // Извлекаем ключ из имени слоя
     const key = textNode.name.split('?')[0].replace(/^#/, '')
 
-    // Ищем соответствующий объект в keyValues
     const keyValue = keyValues.find(keyValue => {
       return keyValue.key === key
     })
 
-    // Заменяем текст
     if (keyValue) {
       console.log('keyValue found', key)
 
-      const value = keyValue.value
+      const value = param.lang === 'uz' ? keyValue.valueUz : keyValue.valueRu
 
       console.log('value', value)
       console.log('param', param)
 
-      // Если есть параметры, пытаемся заменить {paramKey} в value
       if (Object.keys(param).length) {
         const matchedParamKeys = value.match(/(?<=\{).*?(?=\})/g)
 
@@ -96,7 +82,6 @@ export default async function applyValue(
           return
         }
 
-        // Заменяем каждый {paramKey} в value
         let replacedValue = value
         matchedParamKeys.forEach(paramKey => {
           replacedValue = replacedValue.replace(
@@ -107,21 +92,15 @@ export default async function applyValue(
           )
         })
 
-        // Устанавливаем заменённое значение как текст узла
         textNode.characters = replacedValue
-      }
-      // Если параметров нет, просто устанавливаем value как текст узла
-      else {
+      } else {
         textNode.characters = value
       }
-    }
-    // Если соответствующий keyValue не найден
-    else {
+    } else {
       console.log('keyValue not found', key)
     }
   })
 
-  // Отображаем уведомление о завершении
   if (options.targetTextRange === 'selection') {
     figma.notify(i18n.t('notifications.applyValue.finishSelection'))
   } else if (options.targetTextRange === 'currentPage') {

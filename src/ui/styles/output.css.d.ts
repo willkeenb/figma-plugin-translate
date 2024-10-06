@@ -76,6 +76,7 @@ declare const styles: {
   readonly "left-3": string;
   readonly "min-w-[200px]": string;
   readonly "ml-1": string;
+  readonly "ml-2": string;
   readonly "mr-1": string;
   readonly "mt-1": string;
   readonly "mt-2": string;

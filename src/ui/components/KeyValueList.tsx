@@ -15,9 +15,11 @@ import type { NotionKeyValue } from '@/types/common'
 type KeyValueProps = {
   rows: NotionKeyValue[]
   className?: string
+  showRussian: boolean
+  showUzbek: boolean
 }
 
-export default function KeyValueList({ rows, className }: KeyValueProps) {
+export default function KeyValueList({ rows, className, showRussian, showUzbek }: KeyValueProps) {
   const { t } = useTranslation()
   const options = useStore()
   const { updateOptions } = useOptions()
@@ -25,31 +27,24 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
   const [tmpScrollPosition, setTmpScrollPosition] = useState(0)
   const [scrollPositionRestored, setScrollPositionRestored] = useState(false)
 
-  // Функция, выполняемая при клике на строку
   const handleRowClick = useCallback(
     (id: string) => {
       console.log('handleRowClick', id, options.selectedRowId)
-
-      // Если не выбрано, выбираем
-      // Если уже выбрано, снимаем выбор
       if (id !== options.selectedRowId) {
         updateOptions({ selectedRowId: id })
       } else {
         updateOptions({ selectedRowId: null })
       }
     },
-    [options.selectedRowId],
+    [options.selectedRowId, updateOptions],
   )
 
-  // Функция для обновления позиции прокрутки при скролле
   const handleScroll = useCallback(() => {
     if (listRef.current) {
       setTmpScrollPosition(listRef.current.scrollTop)
     }
   }, [])
 
-  // Обновление позиции прокрутки в Store с задержкой
-  // Только когда scrollPositionRestored true
   useDebounce(
     () => {
       if (scrollPositionRestored) {
@@ -58,7 +53,7 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
       }
     },
     100,
-    [tmpScrollPosition],
+    [tmpScrollPosition, scrollPositionRestored, updateOptions],
   )
 
   useMount(() => {
@@ -69,9 +64,6 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
     console.log('KeyValueList unmounted')
   })
 
-  // При изменении rows
-  // Если позиция прокрутки не восстановлена → восстанавливаем
-  // Если позиция прокрутки уже восстановлена (при фильтрации или сортировке) → сбрасываем на 0
   useUpdateEffect(() => {
     console.log(
       'rows updated',
@@ -96,9 +88,8 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
       })
       setTmpScrollPosition(0)
     }
-  }, [rows])
+  }, [rows, options.scrollPosition, scrollPositionRestored])
 
-  // Переустановка слушателя событий при изменении rows
   useUpdateEffect(() => {
     const listElement = listRef.current
 
@@ -111,29 +102,29 @@ export default function KeyValueList({ rows, className }: KeyValueProps) {
         listElement.removeEventListener('scroll', handleScroll)
       }
     }
-  }, [rows])
+  }, [rows, handleScroll])
 
   return (
     <div className={clsx('relative', className)}>
       {rows.length > 0 ? (
         <ul className="h-full overflow-x-hidden overflow-y-auto" ref={listRef}>
-          {rows.map((row, index) => (
+          {rows.map((row) => (
             <KeyValueRow
               key={row.id}
               keyValue={row}
               onClick={handleRowClick}
               selected={row.id === options.selectedRowId}
+              showRussian={showRussian}
+              showUzbek={showUzbek}
             />
           ))}
         </ul>
       ) : (
-        // Пустой список
         <div className="h-full flex flex-col items-center justify-center text-secondary">
           {t('KeyValueList.empty')}
         </div>
       )}
 
-      {/* Индикатор загрузки */}
       {!scrollPositionRestored && (
         <div className="absolute inset-0 z-10 bg-primary flex flex-col items-center justify-center text-secondary">
           {t('KeyValueList.loading')}

@@ -90,7 +90,8 @@ export default function Fetch() {
         integrationToken: INTEGRATION_TOKEN,
         selectedDatabaseId: options.selectedDatabaseId,
         keyPropertyName: KEY_PROPERTY_NAME,
-        valuePropertyName: options.valuePropertyName,
+        valuePropertyNameRu: 'ru',
+        valuePropertyNameUz: 'uz',
         keyValuesArray: keyValuesRef.current,
       })
 

@@ -5,7 +5,6 @@ import { getTextNodes } from '@/main/util'
 
 import type { NotionKeyValue, TargetTextRange } from '@/types/common'
 
-// Функция для переименования слоев
 export default async function renameLayer(
   keyValues: NotionKeyValue[],
   options: {
@@ -16,14 +15,11 @@ export default async function renameLayer(
 ) {
   console.log('renameLayer', keyValues, options)
 
-  // Получение текстовых узлов
   const textNodes = await getTextNodes(options)
 
   console.log('textNodes', textNodes)
 
-  // Если текстовых узлов нет, завершаем выполнение
   if (textNodes.length === 0) {
-    // Отображение уведомления в зависимости от выбранного диапазона
     if (options.targetTextRange === 'selection') {
       figma.notify(i18n.t('notifications.main.noTextInSelection'))
     } else if (options.targetTextRange === 'currentPage') {
@@ -31,36 +27,36 @@ export default async function renameLayer(
     } else if (options.targetTextRange === 'allPages') {
       figma.notify(i18n.t('notifications.main.noTextInAllPages'))
     }
-
     return
   }
 
-  // Предварительная загрузка шрифтов
   await loadFontsAsync(textNodes).catch((error: Error) => {
     const errorMessage = i18n.t('notifications.main.errorLoadFonts')
     figma.notify(errorMessage, { error: true })
     throw new Error(errorMessage)
   })
 
-  // Создание карты, где ключ - значение, а значение - объект KeyValue
-  const valueKeyMap = new Map(
-    keyValues.map(keyValue => [keyValue.value, keyValue]),
+  const valueRuKeyMap = new Map(
+    keyValues.map(keyValue => [keyValue.valueRu, keyValue]),
+  )
+  const valueUzKeyMap = new Map(
+    keyValues.map(keyValue => [keyValue.valueUz, keyValue]),
   )
 
-  // Обработка каждого текстового узла
   textNodes.forEach(textNode => {
-    // Поиск соответствующего KeyValue для текущего текстового узла
-    const matchedKeyValue = valueKeyMap.get(textNode.characters)
+    const matchedKeyValueRu = valueRuKeyMap.get(textNode.characters)
+    const matchedKeyValueUz = valueUzKeyMap.get(textNode.characters)
 
-    // Если найдено соответствие, переименовываем слой
-    if (matchedKeyValue) {
-      console.log('matchedKeyValue exist', textNode.characters, matchedKeyValue)
-      textNode.name = `#${matchedKeyValue.key}`
+    if (matchedKeyValueRu) {
+      console.log('matchedKeyValueRu exist', textNode.characters, matchedKeyValueRu)
+      textNode.name = `#${matchedKeyValueRu.key}`
+    } else if (matchedKeyValueUz) {
+      console.log('matchedKeyValueUz exist', textNode.characters, matchedKeyValueUz)
+      textNode.name = `#${matchedKeyValueUz.key}`
     } else {
       console.log('no matchedKeyValue', textNode.characters)
     }
   })
 
-  // Уведомление о завершении
   figma.notify(i18n.t('notifications.renameLayer.finish'))
 }

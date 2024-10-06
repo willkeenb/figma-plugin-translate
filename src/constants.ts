@@ -55,4 +55,5 @@ export const DEFAULT_OPTIONS: Options = {
   includeInstances: false,
   // Настройки плагина
   pluginLanguage: 'en',
+  options: {}
 }
