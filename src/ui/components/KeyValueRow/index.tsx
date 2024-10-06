@@ -44,13 +44,6 @@ const ValueRow = ({
   t
 }: ValueRowProps) => (
   <div className="w-full flex items-center relative group">
-    {/* <div
-      className="w-10 py-1 text-secondary cursor-pointer hover:text-link copy-button"
-      onClick={() => handleCopy(value)}
-      title={t(`keyValueRow.copy${lang.toUpperCase()}`)}
-    >
-      {lang.toUpperCase()}
-    </div> */}
     <ValueRowContent
       lang={lang}
       value={value}
@@ -60,7 +53,6 @@ const ValueRow = ({
       handleApplyValue={() => handleApplyValue(keyValue, lang)}
       handleSaveChanges={() => handleSaveChanges(lang)}
       handleCancel={() => handleCancel(lang)}
-      handleEdit={() => setEditing(true)}
       inputRef={inputRef}
       t={t}
     />
@@ -71,9 +63,11 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
   const { t } = useTranslation()
   const { getKeyWithQueryStrings, handleOpenInBrowser } = useKeyValueApi()
   const {
+    isEditing, setIsEditing,
     editingRu, setEditingRu, editingUz, setEditingUz,
+    editedKey, setEditedKey,
     editedValueRu, setEditedValueRu, editedValueUz, setEditedValueUz,
-    ruInputRef, uzInputRef,
+    keyInputRef, ruInputRef, uzInputRef,
     handleCopy, handleSaveChanges, handleCancel, handleApplyValue, handleApplyKey
   } = useKeyValueLogic(keyValue, getKeyWithQueryStrings)
 
@@ -87,6 +81,13 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
         handleCopyKey={handleCopyKey}
         handleOpenInBrowser={handleOpenInBrowser}
         t={t}
+        isEditing={isEditing}
+        setIsEditing={setIsEditing}
+        editedKey={editedKey}
+        setEditedKey={setEditedKey}
+        handleSaveChanges={() => handleSaveChanges('key')}
+        handleCancel={() => handleCancel('key')}
+        keyInputRef={keyInputRef}
       />
       <ValueRow
         lang="ru"

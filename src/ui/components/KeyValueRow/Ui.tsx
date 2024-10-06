@@ -1,7 +1,6 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 import { h, Fragment } from 'preact'
-import { IconButton } from '@create-figma-plugin/ui'
 import clsx from 'clsx'
 import type { NotionKeyValue } from '@/types/common'
 import { CustomIconButton } from '@/ui/components/Custom/CustomIconButton'
@@ -12,23 +11,73 @@ type KeyRowProps = {
   handleCopyKey: () => void
   handleOpenInBrowser: (url: string) => void
   t: (key: string) => string
+  isEditing: boolean
+  setIsEditing: (value: boolean) => void
+  editedKey: string
+  setEditedKey: (value: string) => void
+  handleSaveChanges: () => void
+  handleCancel: () => void
+  keyInputRef: preact.RefObject<HTMLInputElement>
 }
 
-export const KeyRow = ({ keyValue, onClick, handleCopyKey, handleOpenInBrowser, t }: KeyRowProps) => (
-  <div className="w-full flex relative items-center">
-    <div
-      className="w-full flex p-1 rounded-2 font-medium hover:bg-hover cursor-pointer hover:text-link"
-      onClick={onClick}
+export const KeyRow = ({
+  keyValue,
+  onClick,
+  handleCopyKey,
+  handleOpenInBrowser,
+  t,
+  isEditing,
+  setIsEditing,
+  editedKey,
+  setEditedKey,
+  handleSaveChanges,
+  handleCancel,
+  keyInputRef
+}: KeyRowProps) => (
+  <div 
+    className="w-full flex p-2 rounded-2 border border-transparent cursor-pointer hover:bg-hover hover:text-link text-wrap"
+    onClick={() => !isEditing && onClick()} // Добавьте этот обработчик клика
+  >
+    <input
+      ref={keyInputRef}
+      value={isEditing ? editedKey : keyValue.key}
+      onChange={(e) => isEditing && setEditedKey(e.currentTarget.value)}
+      className={`w-full bg-transparent text-wrap font-medium mt-1 pr-8 ${isEditing ? '' : 'pointer-events-none'}`}
+      // Удалите обработчик клика отсюда
+      readOnly={!isEditing}
       title={t('KeyValueRow.clickToApply')}
-    >
-      {keyValue.key}
-    </div>
-    <CustomIconButton
-      onClick={() => handleOpenInBrowser(keyValue.url)}
-      title={t('keyValueRow.openInBrowser')}
-      icon="open_in_new"
-      className="w-6 h-6 bg-selectedTertiary rounded"
     />
+    <div className="flex gap-1">
+      {isEditing ? (
+        <>
+          <CustomIconButton
+            onClick={handleSaveChanges}
+            title={t('keyValueRow.saveChanges')}
+            icon="check"
+            className="w-6 h-6 bg-selectedTertiary rounded mr-1"
+          />
+          <CustomIconButton
+            onClick={handleCancel}
+            title={t('keyValueRow.cancel')}
+            icon="close"
+            className="w-6 h-6 bg-selectedTertiary rounded mr-1"
+          />
+        </>
+      ) : (
+        <CustomIconButton
+          onClick={() => setIsEditing(true)}
+          title={t('keyValueRow.edit')}
+          icon="edit"
+          className="w-6 h-6 bg-selectedTertiary rounded mr-1"
+        />
+      )}
+      <CustomIconButton
+        onClick={() => handleOpenInBrowser(keyValue.url)}
+        title={t('keyValueRow.openInBrowser')}
+        icon="open_in_new"
+        className="w-6 h-6 bg-selectedTertiary rounded"
+      />
+    </div>
   </div>
 )
 
@@ -41,12 +90,12 @@ type ValueRowContentProps = {
   handleApplyValue: () => void
   handleSaveChanges: () => void
   handleCancel: () => void
-  handleEdit: () => void
   inputRef: preact.RefObject<HTMLInputElement>
   t: (key: string) => string
 }
 
 export const ValueRowContent = ({
+  lang,
   value,
   editing,
   editedValue,
@@ -54,55 +103,36 @@ export const ValueRowContent = ({
   handleApplyValue,
   handleSaveChanges,
   handleCancel,
-  handleEdit,
   inputRef,
   t
 }: ValueRowContentProps) => (
-  <div className="w-full flex relative">
-    <div
-      className={clsx(
-        "w-full p-1 pr-8 rounded-2 cursor-pointer text-secondary hover:text-link",
-        !editing && "hover:bg-hover"
-      )}
-      onClick={() => !editing && handleApplyValue()}
+  <div 
+    className="w-full flex p-2 rounded-2 border border-transparent hover:bg-hover cursor-pointer hover:text-link text-wrap"
+    onClick={() => !editing && handleApplyValue()} // Добавьте этот обработчик клика
+  >
+    <input
+      ref={inputRef}
+      value={editing ? editedValue : value}
+      onChange={handleInputChange}
+      className={`w-full bg-transparent text-wrap font-medium mt-1 pr-8 focus:outline-none ${editing ? '' : 'pointer-events-none'}`}
+      // Удалите обработчик клика отсюда
+      readOnly={!editing}
       title={editing ? '' : t('KeyValueRow.clickToApply')}
-    >
-      {editing ? (
-        <input
-          ref={inputRef}
-          value={editedValue}
-          onChange={handleInputChange}
-          className="w-full border-none bg-transparent focus:outline-none"
-          onClick={(e) => e.stopPropagation()}
+    />
+    {editing && (
+      <div className="flex h-full items-center">
+        <CustomIconButton
+          onClick={handleSaveChanges}
+          title={t('keyValueRow.saveChanges')}
+          icon="check"
+          className="mr-1"
         />
-      ) : (
-        value
-      )}
-
-    </div>
-    <div className="flex h-6 gap-1">
-        {editing ? (
-          <>
-            <CustomIconButton
-              onClick={handleSaveChanges}
-              title={t('keyValueRow.saveChanges')}
-              icon="check"
-              className="mr-1"
-            />
-            <CustomIconButton
-              onClick={handleCancel}
-              title={t('keyValueRow.cancel')}
-              icon="close"
-            />
-          </>
-        ) : (
-          <CustomIconButton
-            onClick={handleEdit}
-            title={t('keyValueRow.edit')}
-            icon="edit"
-            className="w-6 h-6 bg-selectedTertiary rounded"
-          />
-        )}
+        <CustomIconButton
+          onClick={handleCancel}
+          title={t('keyValueRow.cancel')}
+          icon="close"
+        />
       </div>
+    )}
   </div>
 )

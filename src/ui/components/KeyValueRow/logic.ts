@@ -6,31 +6,38 @@ import type { ApplyKeyValueHandler, NotifyHandler, UpdateKeyValueHandler } from 
 
 export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryStrings: (keyValue: NotionKeyValue, lang: 'ru' | 'uz') => string) {
   const [, copyToClipboardFn] = useCopyToClipboard()
+  const [isEditing, setIsEditing] = useState(false)
   const [editingRu, setEditingRu] = useState(false)
   const [editingUz, setEditingUz] = useState(false)
+  const [editedKey, setEditedKey] = useState(keyValue.key)
   const [editedValueRu, setEditedValueRu] = useState(keyValue.valueRu)
   const [editedValueUz, setEditedValueUz] = useState(keyValue.valueUz)
+  const keyInputRef = useRef<HTMLInputElement>(null)
   const ruInputRef = useRef<HTMLInputElement>(null)
   const uzInputRef = useRef<HTMLInputElement>(null)
 
+
   useEffect(() => {
+    setEditedKey(keyValue.key)
     setEditedValueRu(keyValue.valueRu)
     setEditedValueUz(keyValue.valueUz)
   }, [keyValue])
 
   useEffect(() => {
+    if (isEditing && keyInputRef.current) {
+      keyInputRef.current.focus()
+    }
     if (editingRu && ruInputRef.current) {
       ruInputRef.current.focus()
     }
     if (editingUz && uzInputRef.current) {
       uzInputRef.current.focus()
     }
-  }, [editingRu, editingUz])
+  }, [isEditing, editingRu, editingUz])
 
   const handleApplyValue = useCallback((keyValue: NotionKeyValue, lang: 'ru' | 'uz') => {
     const applyKeyValue = {
       ...keyValue,
-      key: keyValue.key, // Используем оригинальный ключ без изменений
       value: lang === 'uz' ? keyValue.valueUz : keyValue.valueRu
     }
     console.log('Applying key-value:', applyKeyValue)
@@ -40,14 +47,11 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
   const handleApplyKey = useCallback(() => {
     const applyKeyValue = {
       ...keyValue,
-      key: keyValue.key, // Используем оригинальный ключ без изменений
-      value: keyValue.valueRu
+      value: keyValue.valueRu // или keyValue.valueUz, в зависимости от вашей логики
     }
     console.log('Applying key:', applyKeyValue)
     emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
   }, [keyValue])
-  
-  
 
   const handleCopy = useCallback((value: string) => {
     copyToClipboardFn(value)
@@ -57,19 +61,24 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
     })
   }, [copyToClipboardFn])
 
-  const handleSaveChanges = useCallback((lang: 'ru' | 'uz') => {
+  const handleSaveChanges = useCallback((field: 'key' | 'ru' | 'uz') => {
     const updatedKeyValue = {
       ...keyValue,
-      valueRu: lang === 'ru' ? editedValueRu : keyValue.valueRu,
-      valueUz: lang === 'uz' ? editedValueUz : keyValue.valueUz
+      key: field === 'key' ? editedKey : keyValue.key,
+      valueRu: field === 'ru' ? editedValueRu : keyValue.valueRu,
+      valueUz: field === 'uz' ? editedValueUz : keyValue.valueUz
     }
     emit<UpdateKeyValueHandler>('UPDATE_KEY_VALUE', updatedKeyValue)
+    setIsEditing(false)
     setEditingRu(false)
     setEditingUz(false)
-  }, [keyValue, editedValueRu, editedValueUz])
+  }, [keyValue, editedKey, editedValueRu, editedValueUz])
 
-  const handleCancel = useCallback((lang: 'ru' | 'uz') => {
-    if (lang === 'ru') {
+  const handleCancel = useCallback((field: 'key' | 'ru' | 'uz') => {
+    if (field === 'key') {
+      setEditedKey(keyValue.key)
+      setIsEditing(false)
+    } else if (field === 'ru') {
       setEditedValueRu(keyValue.valueRu)
       setEditingRu(false)
     } else {
@@ -79,14 +88,19 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
   }, [keyValue])
 
   return {
+    isEditing,
+    setIsEditing,
     editingRu,
     setEditingRu,
     editingUz,
     setEditingUz,
+    editedKey,
+    setEditedKey,
     editedValueRu,
     setEditedValueRu,
     editedValueUz,
     setEditedValueUz,
+    keyInputRef,
     ruInputRef,
     uzInputRef,
     handleApplyValue,

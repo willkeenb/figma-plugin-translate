@@ -34,6 +34,7 @@ declare const styles: {
   readonly "border-gray-300": string;
   readonly "border-none": string;
   readonly "border-solid": string;
+  readonly "border-transparent": string;
   readonly "bottom-0": string;
   readonly "bottom-1": string;
   readonly "bottom-2": string;
@@ -46,6 +47,7 @@ declare const styles: {
   readonly "flex-col": string;
   readonly "flex-grow": string;
   readonly "flex-wrap": string;
+  readonly "focus-within:border-blue-700": string;
   readonly "focus:border-blue-700": string;
   readonly "focus:outline-none": string;
   readonly "font-medium": string;
@@ -54,6 +56,7 @@ declare const styles: {
   readonly "gap-4": string;
   readonly "group": string;
   readonly "group-hover:block": string;
+  readonly "group-hover:flex": string;
   readonly "group-hover:opacity-100": string;
   readonly "h-1": string;
   readonly "h-10": string;
@@ -112,6 +115,8 @@ declare const styles: {
   readonly "pl-2": string;
   readonly "pl-3": string;
   readonly "pl-8": string;
+  readonly "pointer-events-auto": string;
+  readonly "pointer-events-none": string;
   readonly "pr-10": string;
   readonly "pr-8": string;
   readonly "px-0.5": string;
@@ -145,6 +150,7 @@ declare const styles: {
   readonly "text-secondary": string;
   readonly "text-sm": string;
   readonly "text-white": string;
+  readonly "text-wrap": string;
   readonly "top-0": string;
   readonly "top-1": string;
   readonly "top-1/2": string;
