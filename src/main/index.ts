@@ -18,6 +18,7 @@ import applyKeyValue from '@/main/applyKeyValue'
 import applyValue from '@/main/applyValue'
 import highlightText from '@/main/highlightText'
 import renameLayer from '@/main/renameLayer'
+import { syncWithNotion } from './notionApi'
 
 import type { NotionKeyValue, Options } from '@/types/common'
 import type {
@@ -35,6 +36,7 @@ import type {
   RenameLayerHandler,
   HighlightTextHandler,
   ChangeLanguageHandler,
+  SyncWithNotionHandler,
 } from '@/types/eventHandler'
 
 export default async function () {
@@ -112,6 +114,22 @@ export default async function () {
 
   on<RenameLayerHandler>('RENAME_LAYER', (keyValues, options) => {
     renameLayer(keyValues, options)
+  })
+
+  on<SyncWithNotionHandler>('SYNC_WITH_NOTION', async (updatedFields, id) => {
+    try {
+      await syncWithNotion(updatedFields, id)
+      emit<NotifyHandler>('NOTIFY', {
+        message: 'Changes synced with Notion',
+        options: { timeout: 3000 }
+      })
+    } catch (error) {
+      console.error('Error syncing with Notion:', error)
+      emit<NotifyHandler>('NOTIFY', {
+        message: 'Error syncing with Notion',
+        options: { error: true, timeout: 3000 }
+      })
+    }
   })
 
   on<HighlightTextHandler>('HIGHLIGHT_TEXT', (keyValues, options) => {

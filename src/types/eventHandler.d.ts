@@ -97,6 +97,11 @@ interface ChangeLanguageHandler extends EventHandler {
   handler: (language: PluginLanguage, options?: { notify?: boolean }) => void
 }
 
+export interface SyncWithNotionHandler extends EventHandler {
+  name: 'SYNC_WITH_NOTION'
+  handler: (updatedFields: Partial<NotionKeyValue>, id: string) => void
+}
+
 export type {
   LoadOptionsFromUIHandler,
   LoadOptionsFromMainHandler,
@@ -112,4 +117,5 @@ export type {
   RenameLayerHandler,
   HighlightTextHandler,
   ChangeLanguageHandler,
+  SyncWithNotionHandler
 }

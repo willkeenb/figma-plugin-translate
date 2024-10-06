@@ -51,7 +51,7 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
         setIsEditing={setIsEditing}
         editedKey={editedKey}
         setEditedKey={setEditedKey}
-        handleSaveChanges={(e: Event) => handleSaveChanges(e)}
+        handleSaveChanges={handleSaveChanges}
         handleCancel={(e: Event) => handleCancel(e)}
         keyInputRef={keyInputRef}
         isActive={isEditing && activeField === 'key'}

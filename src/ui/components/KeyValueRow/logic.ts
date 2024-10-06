@@ -2,7 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'preact/hooks'
 import { emit } from '@create-figma-plugin/utilities'
 import { useCopyToClipboard } from 'react-use'
 import type { NotionKeyValue } from '@/types/common'
-import type { ApplyKeyValueHandler, NotifyHandler, UpdateKeyValueHandler } from '@/types/eventHandler'
+import type { ApplyKeyValueHandler, NotifyHandler, UpdateKeyValueHandler, SyncWithNotionHandler } from '@/types/eventHandler'
+import { useKeyValuesStore } from '@/ui/Store'
 
 export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryStrings: (keyValue: NotionKeyValue, lang: 'ru' | 'uz') => string) {
   const [, copyToClipboardFn] = useCopyToClipboard()
@@ -51,15 +52,52 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
     })
   }, [copyToClipboardFn])
 
-  const handleSaveChanges = useCallback((e: Event) => {
-    e.stopPropagation();
-    const updatedKeyValue = {
-      ...keyValue,
-      key: editedKey,
-      valueRu: editedValueRu,
-      valueUz: editedValueUz
+  const handleSaveChanges = useCallback(() => {
+    const updatedFields: Partial<NotionKeyValue> = {}
+    let hasChanges = false
+
+    if (editedKey !== keyValue.key) {
+      updatedFields.key = editedKey
+      hasChanges = true
     }
-    emit<UpdateKeyValueHandler>('UPDATE_KEY_VALUE', updatedKeyValue)
+    if (editedValueRu !== keyValue.valueRu) {
+      updatedFields.valueRu = editedValueRu
+      hasChanges = true
+    }
+    if (editedValueUz !== keyValue.valueUz) {
+      updatedFields.valueUz = editedValueUz
+      hasChanges = true
+    }
+
+    if (hasChanges) {
+      const updatedKeyValue = { ...keyValue, ...updatedFields }
+      
+      // Обновляем кэш и список
+      useKeyValuesStore.getState().keyValues.forEach((kv, index) => {
+        if (kv.id === keyValue.id) {
+          useKeyValuesStore.setState(state => {
+            const newKeyValues = [...state.keyValues]
+            newKeyValues[index] = updatedKeyValue
+            return { keyValues: newKeyValues }
+          })
+        }
+      })
+
+      // Уведомляем пользователя о сохранении
+      emit<NotifyHandler>('NOTIFY', {
+        message: 'Changes saved locally',
+        options: { timeout: 3000 }
+      })
+
+      // Синхронизируем с Notion
+      emit<SyncWithNotionHandler>('SYNC_WITH_NOTION', updatedFields, keyValue.id)
+    } else {
+      emit<NotifyHandler>('NOTIFY', {
+        message: 'No changes to save',
+        options: { timeout: 3000 }
+      })
+    }
+
     setIsEditing(false)
   }, [keyValue, editedKey, editedValueRu, editedValueUz])
 
