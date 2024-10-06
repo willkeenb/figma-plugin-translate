@@ -7,7 +7,7 @@ import type { NotionKeyValue } from '@/types/common'
 
 type KeyRowProps = {
   keyValue: NotionKeyValue
-  onClick: (id: string) => void
+  onClick: () => void
   handleCopyKey: () => void
   handleOpenInBrowser: (url: string) => void
   t: (key: string) => string
@@ -24,7 +24,8 @@ export const KeyRow = ({ keyValue, onClick, handleCopyKey, handleOpenInBrowser, 
     </div>
     <div 
       className="flex-1 p-1 rounded-2 hover:bg-hover cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap"
-      onClick={() => onClick(keyValue.id)}
+      onClick={onClick}
+      title={t('KeyValueRow.clickToApply')}
     >
       {keyValue.key}
     </div>
@@ -44,6 +45,7 @@ type ValueRowContentProps = {
   editing: boolean
   editedValue: string
   handleInputChange: (e: h.JSX.TargetedEvent<HTMLInputElement, Event>) => void
+  handleApplyValue: () => void
   inputRef: preact.RefObject<HTMLInputElement>
   t: (key: string) => string
 }
@@ -54,6 +56,7 @@ export const ValueRowContent = ({
   editing, 
   editedValue, 
   handleInputChange, 
+  handleApplyValue,
   inputRef,
   t
 }: ValueRowContentProps) => (
@@ -63,7 +66,8 @@ export const ValueRowContent = ({
         "w-full p-1 pr-8 rounded-2 cursor-pointer overflow-hidden text-ellipsis whitespace-nowrap",
         !editing && "hover:bg-hover"
       )}
-      title={editing ? '' : t('KeyValueList.clickToApply')}
+      onClick={() => !editing && handleApplyValue()}
+      title={editing ? '' : t('KeyValueRow.clickToApply')}
     >
       {editing ? (
         <input

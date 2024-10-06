@@ -23,6 +23,8 @@ type ValueRowProps = {
   handleSaveChanges: (lang: 'ru' | 'uz') => void
   handleCancel: (lang: 'ru' | 'uz') => void
   setEditing: (value: boolean) => void
+  handleApplyValue: (keyValue: NotionKeyValue, lang: 'ru' | 'uz') => void
+  keyValue: NotionKeyValue
   t: (key: string) => string
 }
 
@@ -37,6 +39,8 @@ const ValueRow = ({
   handleSaveChanges, 
   handleCancel, 
   setEditing, 
+  handleApplyValue,
+  keyValue,
   t 
 }: ValueRowProps) => (
   <div className="w-full flex items-center h-10 relative group">
@@ -53,6 +57,7 @@ const ValueRow = ({
       editing={editing}
       editedValue={editedValue}
       handleInputChange={handleInputChange}
+      handleApplyValue={() => handleApplyValue(keyValue, lang)}
       inputRef={inputRef}
       t={t}
     />
@@ -73,7 +78,7 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
     editingRu, setEditingRu, editingUz, setEditingUz,
     editedValueRu, setEditedValueRu, editedValueUz, setEditedValueUz,
     ruInputRef, uzInputRef,
-    handleCopy, handleSaveChanges, handleCancel
+    handleCopy, handleSaveChanges, handleCancel, handleApplyValue, handleApplyKey
   } = useKeyValueLogic(keyValue, getKeyWithQueryStrings)
 
   const handleCopyKey = () => handleCopy(keyValue.key)
@@ -82,7 +87,7 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
     <li className="border-b border-solid border-b-primary flex flex-col">
       <KeyRow 
         keyValue={keyValue} 
-        onClick={onClick} 
+        onClick={handleApplyKey} 
         handleCopyKey={handleCopyKey} 
         handleOpenInBrowser={handleOpenInBrowser}
         t={t}
@@ -98,6 +103,8 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
         handleSaveChanges={handleSaveChanges}
         handleCancel={handleCancel}
         setEditing={setEditingRu}
+        handleApplyValue={handleApplyValue}
+        keyValue={keyValue}
         t={t}
       />
       {showUzbek && (
@@ -112,6 +119,8 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
           handleSaveChanges={handleSaveChanges}
           handleCancel={handleCancel}
           setEditing={setEditingUz}
+          handleApplyValue={handleApplyValue}
+          keyValue={keyValue}
           t={t}
         />
       )}

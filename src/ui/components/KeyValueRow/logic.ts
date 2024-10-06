@@ -27,13 +27,23 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
     }
   }, [editingRu, editingUz])
 
-  const handleApplyValue = useCallback((value: string, lang: 'ru' | 'uz') => {
+  const handleApplyValue = useCallback((keyValue: NotionKeyValue, lang: 'ru' | 'uz') => {
     const applyKeyValue = {
       ...keyValue,
       key: getKeyWithQueryStrings(keyValue, lang),
-      value: value
+      value: lang === 'uz' ? keyValue.valueUz : keyValue.valueRu
     }
     console.log('Applying key-value:', applyKeyValue)
+    emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
+  }, [getKeyWithQueryStrings])
+
+  const handleApplyKey = useCallback(() => {
+    const applyKeyValue = {
+      ...keyValue,
+      key: getKeyWithQueryStrings(keyValue, 'ru'),
+      value: keyValue.valueRu
+    }
+    console.log('Applying key:', applyKeyValue)
     emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
   }, [keyValue, getKeyWithQueryStrings])
 
@@ -78,6 +88,7 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
     ruInputRef,
     uzInputRef,
     handleApplyValue,
+    handleApplyKey,
     handleCopy,
     handleSaveChanges,
     handleCancel
