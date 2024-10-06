@@ -1,6 +1,5 @@
 /** @jsx h */
 import { type JSX, h } from 'preact'
-import { useState } from 'preact/hooks'
 
 import { Button } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
@@ -17,11 +16,10 @@ type RowProps = {
   keyValue: NotionKeyValue
   onClick: (id: string) => void
   selected: boolean
-  showRussian: boolean
   showUzbek: boolean
 }
 
-export default function KeyValueRow({ keyValue, onClick, selected, showRussian, showUzbek }: RowProps) {
+export default function KeyValueRow({ keyValue, onClick, selected, showUzbek }: RowProps) {
   const { t } = useTranslation()
   const { getKeyWithQueryStrings } = useNotionKeyValue()
   const [, copyToClipboard] = useCopyToClipboard()
@@ -85,30 +83,23 @@ export default function KeyValueRow({ keyValue, onClick, selected, showRussian, 
       </div>
 
       {/* Отображение значения на узбекском */}
-      <div className="w-full flex">
-        <div className="w-10 py-1 text-secondary">UZ</div>
-        <div 
-          className="flex-1 p-1 rounded-2 group hover:bg-hover cursor-pointer"
-          onClick={() => handleApplyValue(keyValue.valueUz, 'uz')}
-          title={t('KeyValueRow.clickToApply')}
-        >
-          <span>{keyValue.valueUz}</span>
-        </div>
-        <button 
-          className="ml-2 p-1 rounded-2 hover:bg-tertiary"
-          onClick={() => handleCopy(keyValue.valueUz, 'UZ')}
-          title={t('KeyValueRow.copyToClipboard')}
-        >
-          📋
-        </button>
-      </div>
-
-      {/* Дополнительные кнопки для выбранной строки */}
-      {selected && (
-        <div className="mt-1 flex flex-col gap-1">
-          <Button secondary fullWidth onClick={handleOpenClick}>
-            {t('KeyValueRow.openBrowserButton')}
-          </Button>
+      {showUzbek && (
+        <div className="w-full flex">
+          <div className="w-10 py-1 text-secondary">UZ</div>
+          <div 
+            className="flex-1 p-1 rounded-2 group hover:bg-hover cursor-pointer"
+            onClick={() => handleApplyValue(keyValue.valueUz, 'uz')}
+            title={t('KeyValueRow.clickToApply')}
+          >
+            <span>{keyValue.valueUz}</span>
+          </div>
+          <button 
+            className="ml-2 p-1 rounded-2 hover:bg-tertiary"
+            onClick={() => handleCopy(keyValue.valueUz, 'UZ')}
+            title={t('KeyValueRow.copyToClipboard')}
+          >
+            📋
+          </button>
         </div>
       )}
     </li>

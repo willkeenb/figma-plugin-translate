@@ -15,11 +15,10 @@ import type { NotionKeyValue } from '@/types/common'
 type KeyValueProps = {
   rows: NotionKeyValue[]
   className?: string
-  showRussian: boolean
   showUzbek: boolean
 }
 
-export default function KeyValueList({ rows, className, showRussian, showUzbek }: KeyValueProps) {
+export default function KeyValueList({ rows, className, showUzbek }: KeyValueProps) {
   const { t } = useTranslation()
   const options = useStore()
   const { updateOptions } = useOptions()
@@ -44,6 +43,7 @@ export default function KeyValueList({ rows, className, showRussian, showUzbek }
       setTmpScrollPosition(listRef.current.scrollTop)
     }
   }, [])
+
 
   useDebounce(
     () => {
@@ -114,7 +114,6 @@ export default function KeyValueList({ rows, className, showRussian, showUzbek }
               keyValue={row}
               onClick={handleRowClick}
               selected={row.id === options.selectedRowId}
-              showRussian={showRussian}
               showUzbek={showUzbek}
             />
           ))}

@@ -2,6 +2,7 @@
 import { Fragment, type JSX, h } from 'preact'
 import { useState, useCallback, useMemo, useEffect } from 'preact/hooks'
 import {
+  Button,
   Divider,
   Dropdown,
   type DropdownOption,
@@ -30,6 +31,7 @@ export default function List() {
   const [fetching, setFetching] = useState(false)
   const [filteredRows, setFilteredRows] = useState<NotionKeyValue[]>([])
   const [isSortVisible, setIsSortVisible] = useState(false)
+  const [showUzbek, setShowUzbek] = useState(false)
 
   useEffect(() => {
     setFilteredRows(keyValues)
@@ -146,6 +148,7 @@ export default function List() {
 
     setFilteredRows(result)
   }, [keyValues, options.filterString, options.sortValue, options.sortOrder])
+
   const handleFilterInput = useCallback((event: JSX.TargetedEvent<HTMLInputElement>) => {
     const inputValue = event.currentTarget.value
     updateOptions({
@@ -169,6 +172,10 @@ export default function List() {
 
   const toggleSortVisibility = useCallback(() => {
     setIsSortVisible(prev => !prev)
+  }, [])
+
+  const toggleUzbek = useCallback(() => {
+    setShowUzbek(prev => !prev)
   }, [])
 
   useMount(() => {
@@ -284,11 +291,15 @@ export default function List() {
 
         <Divider />
 
+        <Button onClick={toggleUzbek}>
+        {showUzbek ? t('hideUzbek') : t('showUzbek')}
+      </Button>
+
         <KeyValueList 
-        rows={filteredRows} 
-        showRussian={true}  // Вы можете добавить опцию для переключения отображения русского языка
-        showUzbek={true}    // Вы можете добавить опцию для переключения отображения узбекского языка
+        rows={filteredRows}
+        showUzbek={showUzbek}
       />
+
 
         <Divider />
 
