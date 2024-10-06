@@ -7,15 +7,13 @@ import type { ApplyKeyValueHandler, NotifyHandler, UpdateKeyValueHandler } from 
 export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryStrings: (keyValue: NotionKeyValue, lang: 'ru' | 'uz') => string) {
   const [, copyToClipboardFn] = useCopyToClipboard()
   const [isEditing, setIsEditing] = useState(false)
-  const [editingRu, setEditingRu] = useState(false)
-  const [editingUz, setEditingUz] = useState(false)
   const [editedKey, setEditedKey] = useState(keyValue.key)
   const [editedValueRu, setEditedValueRu] = useState(keyValue.valueRu)
   const [editedValueUz, setEditedValueUz] = useState(keyValue.valueUz)
-  const keyInputRef = useRef<HTMLInputElement>(null)
-  const ruInputRef = useRef<HTMLInputElement>(null)
-  const uzInputRef = useRef<HTMLInputElement>(null)
-
+  const [activeField, setActiveField] = useState<'key' | 'ru' | 'uz'>('key')
+  const keyInputRef = useRef<HTMLTextAreaElement>(null)
+  const ruInputRef = useRef<HTMLTextAreaElement>(null)
+  const uzInputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     setEditedKey(keyValue.key)
@@ -23,35 +21,27 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
     setEditedValueUz(keyValue.valueUz)
   }, [keyValue])
 
-  useEffect(() => {
-    if (isEditing && keyInputRef.current) {
-      keyInputRef.current.focus()
-    }
-    if (editingRu && ruInputRef.current) {
-      ruInputRef.current.focus()
-    }
-    if (editingUz && uzInputRef.current) {
-      uzInputRef.current.focus()
-    }
-  }, [isEditing, editingRu, editingUz])
-
   const handleApplyValue = useCallback((keyValue: NotionKeyValue, lang: 'ru' | 'uz') => {
-    const applyKeyValue = {
-      ...keyValue,
-      value: lang === 'uz' ? keyValue.valueUz : keyValue.valueRu
+    if (!isEditing) {
+      const applyKeyValue = {
+        ...keyValue,
+        value: lang === 'uz' ? keyValue.valueUz : keyValue.valueRu
+      }
+      console.log('Applying key-value:', applyKeyValue)
+      emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
     }
-    console.log('Applying key-value:', applyKeyValue)
-    emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
-  }, [])
+  }, [isEditing])
   
   const handleApplyKey = useCallback(() => {
-    const applyKeyValue = {
-      ...keyValue,
-      value: keyValue.valueRu // или keyValue.valueUz, в зависимости от вашей логики
+    if (!isEditing) {
+      const applyKeyValue = {
+        ...keyValue,
+        value: keyValue.valueRu
+      }
+      console.log('Applying key:', applyKeyValue)
+      emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
     }
-    console.log('Applying key:', applyKeyValue)
-    emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
-  }, [keyValue])
+  }, [keyValue, isEditing])
 
   const handleCopy = useCallback((value: string) => {
     copyToClipboardFn(value)
@@ -61,45 +51,48 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
     })
   }, [copyToClipboardFn])
 
-  const handleSaveChanges = useCallback((field: 'key' | 'ru' | 'uz') => {
+  const handleSaveChanges = useCallback((e: Event) => {
+    e.stopPropagation();
     const updatedKeyValue = {
       ...keyValue,
-      key: field === 'key' ? editedKey : keyValue.key,
-      valueRu: field === 'ru' ? editedValueRu : keyValue.valueRu,
-      valueUz: field === 'uz' ? editedValueUz : keyValue.valueUz
+      key: editedKey,
+      valueRu: editedValueRu,
+      valueUz: editedValueUz
     }
     emit<UpdateKeyValueHandler>('UPDATE_KEY_VALUE', updatedKeyValue)
     setIsEditing(false)
-    setEditingRu(false)
-    setEditingUz(false)
   }, [keyValue, editedKey, editedValueRu, editedValueUz])
 
-  const handleCancel = useCallback((field: 'key' | 'ru' | 'uz') => {
-    if (field === 'key') {
-      setEditedKey(keyValue.key)
-      setIsEditing(false)
-    } else if (field === 'ru') {
-      setEditedValueRu(keyValue.valueRu)
-      setEditingRu(false)
-    } else {
-      setEditedValueUz(keyValue.valueUz)
-      setEditingUz(false)
-    }
+  const resetTextareaHeight = useCallback(() => {
+    [keyInputRef, ruInputRef, uzInputRef].forEach(ref => {
+      if (ref.current) {
+        ref.current.style.height = 'auto';
+      }
+    });
+  }, []);
+  
+  const handleCancel = useCallback((e: Event) => {
+    e.stopPropagation();
+    setEditedKey(keyValue.key)
+    setEditedValueRu(keyValue.valueRu)
+    setEditedValueUz(keyValue.valueUz)
+    setIsEditing(false)
   }, [keyValue])
+
+  const handleFieldFocus = useCallback((field: 'key' | 'ru' | 'uz') => {
+    setActiveField(field)
+  }, [])
 
   return {
     isEditing,
     setIsEditing,
-    editingRu,
-    setEditingRu,
-    editingUz,
-    setEditingUz,
     editedKey,
     setEditedKey,
     editedValueRu,
     setEditedValueRu,
     editedValueUz,
     setEditedValueUz,
+    activeField,
     keyInputRef,
     ruInputRef,
     uzInputRef,
@@ -107,6 +100,8 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
     handleApplyKey,
     handleCopy,
     handleSaveChanges,
-    handleCancel
+    handleCancel,
+    resetTextareaHeight,
+    handleFieldFocus
   }
 }

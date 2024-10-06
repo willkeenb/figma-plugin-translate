@@ -17,10 +17,12 @@ declare const styles: {
   readonly "bg-gray-200": string;
   readonly "bg-gray-400": string;
   readonly "bg-green-100": string;
+  readonly "bg-green-200": string;
   readonly "bg-hover": string;
   readonly "bg-opacity-50": string;
   readonly "bg-primary": string;
   readonly "bg-purple-100": string;
+  readonly "bg-red-200": string;
   readonly "bg-selected": string;
   readonly "bg-selectedSecondary": string;
   readonly "bg-selectedTertiary": string;
@@ -29,6 +31,7 @@ declare const styles: {
   readonly "border": string;
   readonly "border-b": string;
   readonly "border-b-primary": string;
+  readonly "border-blue-300": string;
   readonly "border-blue-500": string;
   readonly "border-blue-700": string;
   readonly "border-gray-300": string;
@@ -40,6 +43,7 @@ declare const styles: {
   readonly "bottom-2": string;
   readonly "bottom-5": string;
   readonly "cursor-pointer": string;
+  readonly "cursor-text": string;
   readonly "duration-200": string;
   readonly "filter": string;
   readonly "flex": string;
@@ -74,10 +78,13 @@ declare const styles: {
   readonly "hover:bg-blue-300": string;
   readonly "hover:bg-blue-500": string;
   readonly "hover:bg-blue-600": string;
+  readonly "hover:bg-green-200": string;
   readonly "hover:bg-hover": string;
+  readonly "hover:bg-red-200": string;
   readonly "hover:bg-selectedSecondary": string;
   readonly "hover:bg-selectedTertiary": string;
   readonly "hover:bg-tertiary": string;
+  readonly "hover:opacity-100": string;
   readonly "hover:text-blue-700": string;
   readonly "hover:text-gray-600": string;
   readonly "hover:text-link": string;
@@ -126,6 +133,7 @@ declare const styles: {
   readonly "py-2": string;
   readonly "relative": string;
   readonly "resize": string;
+  readonly "resize-none": string;
   readonly "right-0": string;
   readonly "right-1": string;
   readonly "right-1/2": string;

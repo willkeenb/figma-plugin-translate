@@ -12,63 +12,29 @@ type RowProps = {
   showUzbek: boolean
 }
 
-type ValueRowProps = {
-  lang: 'ru' | 'uz'
-  value: string
-  editedValue: string
-  editing: boolean
-  inputRef: preact.RefObject<HTMLInputElement>
-  handleCopy: (value: string) => void
-  handleInputChange: (e: h.JSX.TargetedEvent<HTMLInputElement, Event>) => void
-  handleSaveChanges: (lang: 'ru' | 'uz') => void
-  handleCancel: (lang: 'ru' | 'uz') => void
-  setEditing: (value: boolean) => void
-  handleApplyValue: (keyValue: NotionKeyValue, lang: 'ru' | 'uz') => void
-  keyValue: NotionKeyValue
-  t: (key: string) => string
-}
-
-const ValueRow = ({
-  lang,
-  value,
-  editedValue,
-  editing,
-  inputRef,
-  handleCopy,
-  handleInputChange,
-  handleSaveChanges,
-  handleCancel,
-  setEditing,
-  handleApplyValue,
-  keyValue,
-  t
-}: ValueRowProps) => (
-  <div className="w-full flex items-center relative group">
-    <ValueRowContent
-      lang={lang}
-      value={value}
-      editing={editing}
-      editedValue={editedValue}
-      handleInputChange={handleInputChange}
-      handleApplyValue={() => handleApplyValue(keyValue, lang)}
-      handleSaveChanges={() => handleSaveChanges(lang)}
-      handleCancel={() => handleCancel(lang)}
-      inputRef={inputRef}
-      t={t}
-    />
-  </div>
-)
-
 export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) {
   const { t } = useTranslation()
   const { getKeyWithQueryStrings, handleOpenInBrowser } = useKeyValueApi()
   const {
-    isEditing, setIsEditing,
-    editingRu, setEditingRu, editingUz, setEditingUz,
-    editedKey, setEditedKey,
-    editedValueRu, setEditedValueRu, editedValueUz, setEditedValueUz,
-    keyInputRef, ruInputRef, uzInputRef,
-    handleCopy, handleSaveChanges, handleCancel, handleApplyValue, handleApplyKey
+    isEditing,
+    setIsEditing,
+    editedKey,
+    setEditedKey,
+    editedValueRu,
+    setEditedValueRu,
+    editedValueUz,
+    setEditedValueUz,
+    activeField,
+    keyInputRef,
+    ruInputRef,
+    uzInputRef,
+    handleCopy,
+    handleSaveChanges,
+    handleCancel,
+    handleApplyValue,
+    handleApplyKey,
+    handleFieldFocus,
+    resetTextareaHeight
   } = useKeyValueLogic(keyValue, getKeyWithQueryStrings)
 
   const handleCopyKey = () => handleCopy(keyValue.key)
@@ -85,40 +51,39 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
         setIsEditing={setIsEditing}
         editedKey={editedKey}
         setEditedKey={setEditedKey}
-        handleSaveChanges={() => handleSaveChanges('key')}
-        handleCancel={() => handleCancel('key')}
+        handleSaveChanges={(e: Event) => handleSaveChanges(e)}
+        handleCancel={(e: Event) => handleCancel(e)}
         keyInputRef={keyInputRef}
+        isActive={isEditing && activeField === 'key'}
+        onFocus={() => handleFieldFocus('key')}
+        resetTextareaHeight={resetTextareaHeight}
       />
-      <ValueRow
+      <ValueRowContent
         lang="ru"
         value={keyValue.valueRu}
+        editing={isEditing}
         editedValue={editedValueRu}
-        editing={editingRu}
-        inputRef={ruInputRef}
-        handleCopy={handleCopy}
         handleInputChange={(e) => setEditedValueRu(e.currentTarget.value)}
-        handleSaveChanges={handleSaveChanges}
-        handleCancel={handleCancel}
-        setEditing={setEditingRu}
-        handleApplyValue={handleApplyValue}
-        keyValue={keyValue}
+        handleApplyValue={() => handleApplyValue(keyValue, 'ru')}
+        inputRef={ruInputRef}
         t={t}
+        isActive={isEditing && activeField === 'ru'}
+        onFocus={() => handleFieldFocus('ru')}
+        resetTextareaHeight={resetTextareaHeight}
       />
       {showUzbek && (
-        <ValueRow
+        <ValueRowContent
           lang="uz"
           value={keyValue.valueUz}
+          editing={isEditing}
           editedValue={editedValueUz}
-          editing={editingUz}
-          inputRef={uzInputRef}
-          handleCopy={handleCopy}
           handleInputChange={(e) => setEditedValueUz(e.currentTarget.value)}
-          handleSaveChanges={handleSaveChanges}
-          handleCancel={handleCancel}
-          setEditing={setEditingUz}
-          handleApplyValue={handleApplyValue}
-          keyValue={keyValue}
+          handleApplyValue={() => handleApplyValue(keyValue, 'uz')}
+          inputRef={uzInputRef}
           t={t}
+          isActive={isEditing && activeField === 'uz'}
+          onFocus={() => handleFieldFocus('uz')}
+          resetTextareaHeight={resetTextareaHeight}
         />
       )}
     </li>
