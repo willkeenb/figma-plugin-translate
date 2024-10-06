@@ -3,7 +3,7 @@ import { h } from 'preact'
 import { useTranslation } from 'react-i18next'
 import { useKeyValueLogic } from './logic'
 import { useKeyValueApi } from './api'
-import { KeyRow, ValueRowContent, ValueRowButtons } from './Ui'
+import { KeyRow, ValueRowContent } from './Ui'
 import type { NotionKeyValue } from '@/types/common'
 
 type RowProps = {
@@ -28,29 +28,29 @@ type ValueRowProps = {
   t: (key: string) => string
 }
 
-const ValueRow = ({ 
-  lang, 
-  value, 
-  editedValue, 
-  editing, 
+const ValueRow = ({
+  lang,
+  value,
+  editedValue,
+  editing,
   inputRef,
-  handleCopy, 
-  handleInputChange, 
-  handleSaveChanges, 
-  handleCancel, 
-  setEditing, 
+  handleCopy,
+  handleInputChange,
+  handleSaveChanges,
+  handleCancel,
+  setEditing,
   handleApplyValue,
   keyValue,
-  t 
+  t
 }: ValueRowProps) => (
-  <div className="w-full flex items-center h-10 relative group">
-    <div 
+  <div className="w-full flex items-center relative group">
+    {/* <div
       className="w-10 py-1 text-secondary cursor-pointer hover:text-link copy-button"
       onClick={() => handleCopy(value)}
       title={t(`keyValueRow.copy${lang.toUpperCase()}`)}
     >
       {lang.toUpperCase()}
-    </div>
+    </div> */}
     <ValueRowContent
       lang={lang}
       value={value}
@@ -58,14 +58,10 @@ const ValueRow = ({
       editedValue={editedValue}
       handleInputChange={handleInputChange}
       handleApplyValue={() => handleApplyValue(keyValue, lang)}
-      inputRef={inputRef}
-      t={t}
-    />
-    <ValueRowButtons
-      editing={editing}
       handleSaveChanges={() => handleSaveChanges(lang)}
       handleCancel={() => handleCancel(lang)}
       handleEdit={() => setEditing(true)}
+      inputRef={inputRef}
       t={t}
     />
   </div>
@@ -84,11 +80,11 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
   const handleCopyKey = () => handleCopy(keyValue.key)
 
   return (
-    <li className="border-b border-solid border-b-primary flex flex-col">
-      <KeyRow 
-        keyValue={keyValue} 
-        onClick={handleApplyKey} 
-        handleCopyKey={handleCopyKey} 
+    <li className="border-b border-solid gap-1 py-2 flex flex-col">
+      <KeyRow
+        keyValue={keyValue}
+        onClick={handleApplyKey}
+        handleCopyKey={handleCopyKey}
         handleOpenInBrowser={handleOpenInBrowser}
         t={t}
       />

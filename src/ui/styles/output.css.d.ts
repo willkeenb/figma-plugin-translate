@@ -48,6 +48,7 @@ declare const styles: {
   readonly "flex-wrap": string;
   readonly "focus:border-blue-700": string;
   readonly "focus:outline-none": string;
+  readonly "font-medium": string;
   readonly "gap-1": string;
   readonly "gap-2": string;
   readonly "gap-4": string;
@@ -60,6 +61,7 @@ declare const styles: {
   readonly "h-4": string;
   readonly "h-5": string;
   readonly "h-500": string;
+  readonly "h-6": string;
   readonly "h-7": string;
   readonly "h-8": string;
   readonly "h-full": string;
@@ -84,7 +86,14 @@ declare const styles: {
   readonly "justify-end": string;
   readonly "left-2": string;
   readonly "left-3": string;
+  readonly "min-h-24": string;
+  readonly "min-h-4": string;
+  readonly "min-h-[24px]": string;
+  readonly "min-w-2": string;
+  readonly "min-w-24": string;
+  readonly "min-w-4": string;
   readonly "min-w-[200px]": string;
+  readonly "min-w-[24px]": string;
   readonly "ml-1": string;
   readonly "ml-2": string;
   readonly "mr-1": string;
@@ -134,6 +143,7 @@ declare const styles: {
   readonly "text-primary": string;
   readonly "text-purple-500": string;
   readonly "text-secondary": string;
+  readonly "text-sm": string;
   readonly "text-white": string;
   readonly "top-0": string;
   readonly "top-1": string;
@@ -156,9 +166,11 @@ declare const styles: {
   readonly "w-1": string;
   readonly "w-1/2": string;
   readonly "w-10": string;
+  readonly "w-2": string;
   readonly "w-3": string;
   readonly "w-4": string;
   readonly "w-5": string;
+  readonly "w-6": string;
   readonly "w-8": string;
   readonly "w-full": string;
   readonly "whitespace-nowrap": string;

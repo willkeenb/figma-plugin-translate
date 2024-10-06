@@ -30,22 +30,24 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
   const handleApplyValue = useCallback((keyValue: NotionKeyValue, lang: 'ru' | 'uz') => {
     const applyKeyValue = {
       ...keyValue,
-      key: getKeyWithQueryStrings(keyValue, lang),
+      key: keyValue.key, // Используем оригинальный ключ без изменений
       value: lang === 'uz' ? keyValue.valueUz : keyValue.valueRu
     }
     console.log('Applying key-value:', applyKeyValue)
     emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
-  }, [getKeyWithQueryStrings])
-
+  }, [])
+  
   const handleApplyKey = useCallback(() => {
     const applyKeyValue = {
       ...keyValue,
-      key: getKeyWithQueryStrings(keyValue, 'ru'),
+      key: keyValue.key, // Используем оригинальный ключ без изменений
       value: keyValue.valueRu
     }
     console.log('Applying key:', applyKeyValue)
     emit<ApplyKeyValueHandler>('APPLY_KEY_VALUE', applyKeyValue)
-  }, [keyValue, getKeyWithQueryStrings])
+  }, [keyValue])
+  
+  
 
   const handleCopy = useCallback((value: string) => {
     copyToClipboardFn(value)
