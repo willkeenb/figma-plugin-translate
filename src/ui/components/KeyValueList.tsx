@@ -113,7 +113,6 @@ export default function KeyValueList({ rows, className, showUzbek }: KeyValuePro
               key={row.id}
               keyValue={row}
               onClick={handleRowClick}
-              selected={row.id === options.selectedRowId}
               showUzbek={showUzbek}
             />
           ))}

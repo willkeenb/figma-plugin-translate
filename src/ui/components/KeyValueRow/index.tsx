@@ -1,0 +1,120 @@
+/** @jsx h */
+import { h } from 'preact'
+import { useTranslation } from 'react-i18next'
+import { useKeyValueLogic } from './logic'
+import { useKeyValueApi } from './api'
+import { KeyRow, ValueRowContent, ValueRowButtons } from './Ui'
+import type { NotionKeyValue } from '@/types/common'
+
+type RowProps = {
+  keyValue: NotionKeyValue
+  onClick: (id: string) => void
+  showUzbek: boolean
+}
+
+type ValueRowProps = {
+  lang: 'ru' | 'uz'
+  value: string
+  editedValue: string
+  editing: boolean
+  inputRef: preact.RefObject<HTMLInputElement>
+  handleCopy: (value: string) => void
+  handleInputChange: (e: h.JSX.TargetedEvent<HTMLInputElement, Event>) => void
+  handleSaveChanges: (lang: 'ru' | 'uz') => void
+  handleCancel: (lang: 'ru' | 'uz') => void
+  setEditing: (value: boolean) => void
+  t: (key: string) => string
+}
+
+const ValueRow = ({ 
+  lang, 
+  value, 
+  editedValue, 
+  editing, 
+  inputRef,
+  handleCopy, 
+  handleInputChange, 
+  handleSaveChanges, 
+  handleCancel, 
+  setEditing, 
+  t 
+}: ValueRowProps) => (
+  <div className="w-full flex items-center h-10 relative group">
+    <div 
+      className="w-10 py-1 text-secondary cursor-pointer hover:text-link copy-button"
+      onClick={() => handleCopy(value)}
+      title={t(`keyValueRow.copy${lang.toUpperCase()}`)}
+    >
+      {lang.toUpperCase()}
+    </div>
+    <ValueRowContent
+      lang={lang}
+      value={value}
+      editing={editing}
+      editedValue={editedValue}
+      handleInputChange={handleInputChange}
+      inputRef={inputRef}
+      t={t}
+    />
+    <ValueRowButtons
+      editing={editing}
+      handleSaveChanges={() => handleSaveChanges(lang)}
+      handleCancel={() => handleCancel(lang)}
+      handleEdit={() => setEditing(true)}
+      t={t}
+    />
+  </div>
+)
+
+export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) {
+  const { t } = useTranslation()
+  const { getKeyWithQueryStrings, handleOpenInBrowser } = useKeyValueApi()
+  const {
+    editingRu, setEditingRu, editingUz, setEditingUz,
+    editedValueRu, setEditedValueRu, editedValueUz, setEditedValueUz,
+    ruInputRef, uzInputRef,
+    handleCopy, handleSaveChanges, handleCancel
+  } = useKeyValueLogic(keyValue, getKeyWithQueryStrings)
+
+  const handleCopyKey = () => handleCopy(keyValue.key)
+
+  return (
+    <li className="border-b border-solid border-b-primary flex flex-col">
+      <KeyRow 
+        keyValue={keyValue} 
+        onClick={onClick} 
+        handleCopyKey={handleCopyKey} 
+        handleOpenInBrowser={handleOpenInBrowser}
+        t={t}
+      />
+      <ValueRow
+        lang="ru"
+        value={keyValue.valueRu}
+        editedValue={editedValueRu}
+        editing={editingRu}
+        inputRef={ruInputRef}
+        handleCopy={handleCopy}
+        handleInputChange={(e) => setEditedValueRu(e.currentTarget.value)}
+        handleSaveChanges={handleSaveChanges}
+        handleCancel={handleCancel}
+        setEditing={setEditingRu}
+        t={t}
+      />
+      {showUzbek && (
+        <ValueRow
+          lang="uz"
+          value={keyValue.valueUz}
+          editedValue={editedValueUz}
+          editing={editingUz}
+          inputRef={uzInputRef}
+          handleCopy={handleCopy}
+          handleInputChange={(e) => setEditedValueUz(e.currentTarget.value)}
+          handleSaveChanges={handleSaveChanges}
+          handleCancel={handleCancel}
+          setEditing={setEditingUz}
+          t={t}
+        />
+      )}
+    </li>
+  )
+}

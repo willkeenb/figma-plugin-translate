@@ -21,19 +21,20 @@ import renameLayer from '@/main/renameLayer'
 
 import type { NotionKeyValue, Options } from '@/types/common'
 import type {
+  LoadOptionsFromUIHandler,
+  LoadOptionsFromMainHandler,
+  SaveOptionsHandler,
+  NotifyHandler,
+  ResizeWindowHandler,
+  LoadCacheFromUIHandler,
+  LoadCacheFromMainHandler,
+  SaveCacheHandler,
   ApplyKeyValueHandler,
   ApplyValueHandler,
-  ChangeLanguageHandler,
-  HighlightTextHandler,
-  LoadCacheFromMainHandler,
-  LoadCacheFromUIHandler,
-  LoadOptionsFromMainHandler,
-  LoadOptionsFromUIHandler,
-  NotifyHandler,
+  UpdateKeyValueHandler,
   RenameLayerHandler,
-  ResizeWindowHandler,
-  SaveCacheHandler,
-  SaveOptionsHandler,
+  HighlightTextHandler,
+  ChangeLanguageHandler,
 } from '@/types/eventHandler'
 
 export default async function () {
@@ -60,8 +61,12 @@ export default async function () {
     await saveSettingsAsync<Options>(options, SETTINGS_KEY)
   })
 
-  on<NotifyHandler>('NOTIFY', options => {
-    figma.notify(options.message, options.options)
+  on<NotifyHandler>('NOTIFY', ({ message, options }) => {
+    if (options?.timeout) {
+      figma.notify(message, { ...options, timeout: options.timeout })
+    } else {
+      figma.notify(message, options)
+    }
   })
 
   on<ResizeWindowHandler>('RESIZE_WINDOW', windowSize => {
@@ -95,6 +100,14 @@ export default async function () {
 
   on<ApplyValueHandler>('APPLY_VALUE', (keyValues, options) => {
     applyValue(keyValues, options)
+  })
+
+  on<UpdateKeyValueHandler>('UPDATE_KEY_VALUE', async (updatedKeyValue) => {
+    // Здесь должна быть логика обновления значения в вашем хранилище данных
+    // Например, обновление в Notion или в локальном кэше
+    console.log('Updating key-value:', updatedKeyValue)
+    // После успешного обновления, возможно, вы захотите обновить состояние в UI
+    // emit<RefreshUIHandler>('REFRESH_UI')
   })
 
   on<RenameLayerHandler>('RENAME_LAYER', (keyValues, options) => {

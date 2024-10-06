@@ -1,6 +1,9 @@
 {
   "extends": "@create-figma-plugin/tsconfig",
   "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
     "typeRoots": ["node_modules/@figma", "node_modules/@types", "src/types"],
     "baseUrl": ".",
     "paths": {
@@ -8,6 +11,7 @@
     },
     "skipLibCheck": true,
     "resolveJsonModule": true
+    
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

@@ -23,7 +23,7 @@ interface SaveOptionsHandler extends EventHandler {
 
 interface NotifyHandler extends EventHandler {
   name: 'NOTIFY'
-  handler: (options: { message: string; options?: NotificationOptions }) => void
+  handler: (options: { message: string; options?: NotificationOptions & { timeout?: number } }) => void
 }
 
 interface ResizeWindowHandler extends EventHandler {
@@ -61,6 +61,11 @@ interface ApplyValueHandler extends EventHandler {
       includeInstances: boolean
     },
   ) => void
+}
+
+interface UpdateKeyValueHandler extends EventHandler {
+  name: 'UPDATE_KEY_VALUE'
+  handler: (keyValue: NotionKeyValue) => void
 }
 
 interface RenameLayerHandler extends EventHandler {
@@ -103,6 +108,7 @@ export type {
   SaveCacheHandler,
   ApplyKeyValueHandler,
   ApplyValueHandler,
+  UpdateKeyValueHandler,
   RenameLayerHandler,
   HighlightTextHandler,
   ChangeLanguageHandler,

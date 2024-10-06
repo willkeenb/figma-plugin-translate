@@ -31,7 +31,7 @@ export default function App() {
   const { loadCacheFromDocument } = useCache()
   const [mounted, setMounted] = useState(false)
   const [selectedTabValue, setSelectedTabValue] =
-    useState<SelectedTabValue>('Fetch')
+    useState<SelectedTabValue>('List')
 
   // Определение опций для вкладок
   const tabOptions: TabsOption[] &

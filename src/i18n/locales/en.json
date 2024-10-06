@@ -112,8 +112,8 @@
     "Settings": {
       "updateLanguage": "Language updated."
     },
-    "KeyValueRow": {
-      "copy": "Copied {{title}} to clipboard."
+    "RowKeyValue": {
+      "copy": "Copied: {{value}}"
     },
     "main": {
       "noSelections": "Please select at least one layer.",
