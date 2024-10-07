@@ -53,22 +53,23 @@ export function useKeyValueLogic(keyValue: NotionKeyValue, getKeyWithQueryString
   }, [copyToClipboardFn])
 
 
-  const handleSaveChanges = useCallback((e: Event) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
+  const handleSaveChanges = useCallback(() => {
     const updatedFields: Partial<NotionKeyValue> = {}
     let hasChanges = false
   
-    if (editedKey !== keyValue.key) {
+    const isValueChanged = (oldValue: string, newValue: string) => {
+      return oldValue.trim() !== newValue.trim();
+    }
+  
+    if (isValueChanged(keyValue.key, editedKey)) {
       updatedFields.key = editedKey
       hasChanges = true
     }
-    if (editedValueRu !== keyValue.valueRu) {
+    if (isValueChanged(keyValue.valueRu, editedValueRu)) {
       updatedFields.valueRu = editedValueRu
       hasChanges = true
     }
-    if (editedValueUz !== keyValue.valueUz) {
+    if (isValueChanged(keyValue.valueUz, editedValueUz)) {
       updatedFields.valueUz = editedValueUz
       hasChanges = true
     }  
