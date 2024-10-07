@@ -99,7 +99,7 @@ interface ChangeLanguageHandler extends EventHandler {
 
 export interface SyncWithNotionHandler extends EventHandler {
   name: 'SYNC_WITH_NOTION'
-  handler: (updatedFields: Partial<NotionKeyValue>, id: string) => void
+  handler: (updatedFields: Partial<NotionKeyValue>, id: string, originalKeyValue: NotionKeyValue) => void
 }
 
 export type {

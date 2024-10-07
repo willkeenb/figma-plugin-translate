@@ -90,6 +90,7 @@ declare const styles: {
   readonly "hover:text-link": string;
   readonly "icon": string;
   readonly "inset-0": string;
+  readonly "italic": string;
   readonly "items-center": string;
   readonly "justify-between": string;
   readonly "justify-center": string;
@@ -176,6 +177,7 @@ declare const styles: {
   readonly "translate-y-1/2": string;
   readonly "translate-y-1/3": string;
   readonly "translate-y-6": string;
+  readonly "underline": string;
   readonly "visible": string;
   readonly "w-1": string;
   readonly "w-1/2": string;

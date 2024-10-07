@@ -1,3 +1,11 @@
+figma.notify('Plugin started');
+
+if (figma.currentUser) {
+  figma.notify(`Current user: ${figma.currentUser.name}`);
+} else {
+  figma.notify('No current user found');
+}
+
 import {
   emit,
   loadSettingsAsync,
@@ -116,22 +124,26 @@ export default async function () {
     renameLayer(keyValues, options)
   })
 
-  on<SyncWithNotionHandler>('SYNC_WITH_NOTION', async (updatedFields, id) => {
+  on<SyncWithNotionHandler>('SYNC_WITH_NOTION', async (updatedFields, id, originalKeyValue) => {
+    console.log('SYNC_WITH_NOTION event received', { updatedFields, id, originalKeyValue });
     try {
-      await syncWithNotion(updatedFields, id)
+      const userName = figma.currentUser ? figma.currentUser.name : 'Unknown User'
+      console.log('Current Figma user:', userName);
+      const result = await syncWithNotion(updatedFields, id, originalKeyValue, userName)
+      console.log('Sync with Notion result:', result);
       emit<NotifyHandler>('NOTIFY', {
-        message: 'Changes synced with Notion',
+        message: 'Changes synced with Notion and comment added',
         options: { timeout: 3000 }
       })
     } catch (error) {
       console.error('Error syncing with Notion:', error)
       emit<NotifyHandler>('NOTIFY', {
-        message: 'Error syncing with Notion',
-        options: { error: true, timeout: 3000 }
+        message: `Error syncing with Notion: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        options: { error: true, timeout: 5000 }
       })
     }
   })
-
+  
   on<HighlightTextHandler>('HIGHLIGHT_TEXT', (keyValues, options) => {
     highlightText(keyValues, options)
   })

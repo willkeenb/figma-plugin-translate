@@ -3,7 +3,7 @@ import { type JSX, h } from 'preact'
 import { useState } from 'preact/hooks'
 
 import { Tabs, type TabsOption } from '@create-figma-plugin/ui'
-import { emit } from '@create-figma-plugin/utilities'
+import { emit, on } from '@create-figma-plugin/utilities'
 import { useTranslation } from 'react-i18next'
 import { useMount, useUnmount, useUpdateEffect } from 'react-use'
 
@@ -17,7 +17,13 @@ import Settings from '@/ui/tabs/Settings'
 import Utilities from '@/ui/tabs/Utilities'
 
 import type { SelectedTabKey, SelectedTabValue } from '@/types/common'
-import type { ChangeLanguageHandler } from '@/types/eventHandler'
+import type { ChangeLanguageHandler, NotifyHandler } from '@/types/eventHandler'
+
+function setupEventHandlers() {
+  on<NotifyHandler>('NOTIFY', ({ message, options }) => {
+    emit<NotifyHandler>('NOTIFY', { message, options })
+  })
+}
 
 export default function App() {
   const { t, i18n } = useTranslation()
