@@ -1,28 +1,58 @@
 import { PROXY_URL, INTEGRATION_TOKEN } from '@/constants'
 import type { NotionKeyValue } from '@/types/common'
 
-  // Функция для создания rich text объекта
-  const createRichText = (content: string, options: { 
-    bold?: boolean, 
-    italic?: boolean, 
-    strikethrough?: boolean, 
-    underline?: boolean, 
-    code?: boolean, 
-    color?: string 
-  } = {}) => ({
+type StyleOption = 'b' | 'i' | 's' | 'u' | 'c' | 'gray' | 'brown' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple' | 'pink' | 'red' | `${string}_background`;
+
+interface CommentRequestBody {
+  parent: { page_id: string };
+  rich_text: Array<{
+    type: 'text';
+    text: { content: string };
+    annotations?: {
+      bold?: boolean;
+      italic?: boolean;
+      strikethrough?: boolean;
+      underline?: boolean;
+      code?: boolean;
+      color?: string;
+    };
+  }>;
+}
+
+// Обновленная функция для создания форматированного текста
+const style = (content: string, ...styles: StyleOption[]): CommentRequestBody['rich_text'][number] => {
+  const annotations: any = {
+    bold: styles.includes('b'),
+    italic: styles.includes('i'),
+    strikethrough: styles.includes('s'),
+    underline: styles.includes('u'),
+    code: styles.includes('c'),
+  };
+
+  const color = styles.find(s => ['gray', 'brown', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'red'].includes(s));
+  const background = styles.find(s => s.endsWith('_background'));
+
+  if (color && background) {
+    annotations.color = `${color}_background`;
+  } else if (color) {
+    annotations.color = color;
+  } else if (background) {
+    annotations.color = background;
+  }
+
+  return {
     type: 'text',
     text: { content },
-    annotations: {
-      bold: options.bold || false,
-      italic: options.italic || false,
-      strikethrough: options.strikethrough || false,
-      underline: options.underline || false,
-      code: options.code || false,
-      color: options.color || 'default'
-    }
-  });
+    annotations
+  };
+};
 
-export async function syncWithNotion(updatedFields: Partial<NotionKeyValue>, id: string, originalKeyValue: NotionKeyValue, userName: string) {
+export async function syncWithNotion(
+  updatedFields: Partial<Pick<NotionKeyValue, 'key' | 'valueRu' | 'valueUz'>>,
+  id: string,
+  originalKeyValue: Pick<NotionKeyValue, 'key' | 'valueRu' | 'valueUz'>,
+  userName: string
+) {
   const apiUrl = `https://api.notion.com/v1/pages/${id}`
   const fullUrl = `${PROXY_URL}/${encodeURIComponent(apiUrl)}`
 
@@ -55,77 +85,88 @@ export async function syncWithNotion(updatedFields: Partial<NotionKeyValue>, id:
     return trimmedValue === "" ? "Пусто" : trimmedValue;
   };
 
-   // Формируем сообщение для комментария
-   const commentRichText = [
-     createRichText(`👤 Изменения внесены пользователем: ${userName}\n\n`, { bold: true }),
-     createRichText("Что было изменено:\n")
-   ];
- 
-   if (updatedFields.key !== undefined) {
-     commentRichText.push(
-       createRichText(`🔑 Ключ:\n   `),
-       createRichText(displayValue(originalKeyValue.key), { strikethrough: true }),
-       createRichText(` ➡️ `),
-       createRichText(displayValue(updatedFields.key), { bold: true }),
-       createRichText(`\n`)
-     );
-   }
-   if (updatedFields.valueRu !== undefined) {
-     commentRichText.push(
-       createRichText(`🇷🇺 Русский:\n   `),
-       createRichText(displayValue(originalKeyValue.valueRu), { strikethrough: true }),
-       createRichText(` ➡️ `),
-       createRichText(displayValue(updatedFields.valueRu), { bold: true }),
-       createRichText(`\n`)
-     );
-   }
-   if (updatedFields.valueUz !== undefined) {
-     commentRichText.push(
-       createRichText(`🇺🇿 Узбекский:\n   `),
-       createRichText(displayValue(originalKeyValue.valueUz), { strikethrough: true }),
-       createRichText(` ➡️ `),
-       createRichText(displayValue(updatedFields.valueUz), { bold: true }),
-       createRichText(`\n`)
-     );
-   }
- 
-   // Добавляем временную метку
-   const now = new Date();
-   commentRichText.push(createRichText(`\n⏰ Время изменения: ${now.toLocaleString()}`, { italic: true }));
- 
-   // Добавляем комментарий после успешного обновления
-   await addCommentToNotion(id, commentRichText);
- 
-   return result;
- }
+  // Формируем сообщение для комментария
+  const commentRichText = [
+    style(`👤  ${userName}\n\n`,),
+    style("Что было изменено:\n", 'gray')
+  ];
 
-export async function addCommentToNotion(pageId: string, commentRichText: any[]) {
+  if (updatedFields.key !== undefined) {
+    commentRichText.push(
+      style(`🔑  `, 'b'),
+      style(displayValue(originalKeyValue.key), 'red_background', 's'),
+      style(` → `),
+      style(displayValue(updatedFields.key), 'green_background', 'b'),
+      style(`\n`)
+    );
+  }
+  if (updatedFields.valueRu !== undefined) {
+    commentRichText.push(
+      style(`🇷🇺  `, 'b'),
+      style(displayValue(originalKeyValue.valueRu), 'red_background', 's'),
+      style(` → `),
+      style(displayValue(updatedFields.valueRu), 'green_background', 'b'),
+      style(`\n`)
+    );
+  }
+  if (updatedFields.valueUz !== undefined) {
+    commentRichText.push(
+      style(`🇺🇿  `, 'b'),
+      style(displayValue(originalKeyValue.valueUz), 'red', 'red_background', 's'),
+      style(` → `),
+      style(displayValue(updatedFields.valueUz), 'green_background', 'b'),
+      style(`\n`)
+    );
+  }
+
+  // Добавляем комментарий после успешного обновления
+  await addCommentToNotion(id, commentRichText);
+
+  return result;
+}
+
+export async function addCommentToNotion(pageId: string, commentRichText: CommentRequestBody['rich_text']) {
   const apiUrl = `https://api.notion.com/v1/comments`
   const fullUrl = `${PROXY_URL}/${encodeURIComponent(apiUrl)}`
 
-  const response = await fetch(fullUrl, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${INTEGRATION_TOKEN}`,
-      'Notion-Version': '2022-06-28',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      parent: { page_id: pageId },
-      rich_text: commentRichText
-    }),
-  })
-  console.log('Request body:', JSON.stringify({
+  const requestBody: CommentRequestBody = {
     parent: { page_id: pageId },
     rich_text: commentRichText
-  }, null, 2));
+  };
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Failed to add comment to Notion: ${errorText}`)
+  console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
+  try {
+    const response = await fetch(fullUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${INTEGRATION_TOKEN}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      console.error('Response status:', response.status);
+      
+      // Безопасный способ логирования заголовков
+      const headers: Record<string, string> = {};
+      response.headers.forEach((value, key) => {
+        headers[key] = value;
+      });
+      console.error('Response headers:', headers);
+
+      throw new Error(`Failed to add comment to Notion: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error in addCommentToNotion:', error);
+    throw error;
   }
-
-  return await response.json()
 }
 
 export async function fetchNotion(options: {
