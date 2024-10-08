@@ -19,6 +19,8 @@
   "dependencies": {
     "@create-figma-plugin/ui": "3.2.0",
     "@create-figma-plugin/utilities": "3.2.0",
+    "@sentry/browser": "^8.33.1",
+    "@sentry/react": "^8.33.1",
     "clsx": "2.1.1",
     "i18next": "23.14.0",
     "lodash": "4.17.21",
@@ -32,7 +34,7 @@
     "@biomejs/biome": "1.8.3",
     "@create-figma-plugin/build": "3.2.0",
     "@create-figma-plugin/tsconfig": "3.2.0",
-    "@figma/plugin-typings": "1.98.0",
+    "@figma/plugin-typings": "^1.100.2",
     "@types/lodash": "4.17.7",
     "@types/node": "^22.7.4",
     "concurrently": "8.2.2",
@@ -51,14 +53,24 @@
     ],
     "capabilities": [
       "inspect",
-      "vscode"
+      "vscode",
+      "codegen",
+      "textreview"
     ],
     "id": "1418849803064613337",
     "name": "Text Sync",
     "main": "src/main/index.ts",
     "ui": "src/ui/index.tsx",
     "permissions": [
-      "currentuser"
+      "currentuser",
+      "fileusers",
+      "activeusers"
+    ],
+    "codegenLanguages": [
+      {
+        "label": "JSON",
+        "value": "json"
+      }
     ],
     "relaunchButtons": [
       {

@@ -169,20 +169,27 @@ export async function addCommentToNotion(pageId: string, commentRichText: Commen
   }
 }
 
-export async function fetchNotion(options: {
-  selectedDatabaseId: string
-  keyPropertyName: string
-  valuePropertyNameRu: string
-  valuePropertyNameUz: string
-  nextCursor?: string
-  keyValuesArray: NotionKeyValue[]
-}) {
-  const apiUrl = `https://api.notion.com/v1/databases/${options.selectedDatabaseId}/query`
+export async function fetchNotion({
+  selectedDatabaseId,
+  keyPropertyName,
+  valuePropertyNameRu,
+  valuePropertyNameUz,
+  nextCursor,
+  keyValuesArray = []
+}: {
+  selectedDatabaseId: string;
+  keyPropertyName: string;
+  valuePropertyNameRu: string;
+  valuePropertyNameUz: string;
+  nextCursor?: string;
+  keyValuesArray?: NotionKeyValue[];
+}): Promise<NotionKeyValue[]> {
+  const apiUrl = `https://api.notion.com/v1/databases/${selectedDatabaseId}/query`
   const fullUrl = `${PROXY_URL}/${encodeURIComponent(apiUrl)}`
 
   const reqParams = {
     page_size: 100,
-    start_cursor: options.nextCursor || undefined,
+    start_cursor: nextCursor || undefined,
   }
 
   const response = await fetch(fullUrl, {
@@ -200,5 +207,30 @@ export async function fetchNotion(options: {
     throw new Error(`Failed to fetch from Notion: ${errorText}`)
   }
 
-  return await response.json()
+  const data = await response.json()
+
+  const newKeyValues: NotionKeyValue[] = data.results.map((page: any) => ({
+    id: page.id,
+    key: page.properties[keyPropertyName]?.title[0]?.plain_text || '',
+    valueRu: page.properties[valuePropertyNameRu]?.rich_text[0]?.plain_text || '',
+    valueUz: page.properties[valuePropertyNameUz]?.rich_text[0]?.plain_text || '',
+    created_time: page.created_time,
+    last_edited_time: page.last_edited_time,
+    url: page.url,
+  }));
+
+  const allKeyValues = [...keyValuesArray, ...newKeyValues];
+
+  if (data.has_more && data.next_cursor) {
+    return fetchNotion({
+      selectedDatabaseId,
+      keyPropertyName,
+      valuePropertyNameRu,
+      valuePropertyNameUz,
+      nextCursor: data.next_cursor,
+      keyValuesArray: allKeyValues,
+    });
+  }
+
+  return allKeyValues;
 }
