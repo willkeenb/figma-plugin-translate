@@ -1,5 +1,6 @@
 figma.notify('Plugin started');
 
+
 if (figma.currentUser) {
   figma.notify(`Current user: ${figma.currentUser.name}`);
 } else {
@@ -10,6 +11,7 @@ import {
   emit,
   loadSettingsAsync,
   on,
+  once,
   saveSettingsAsync,
   setRelaunchButton,
   showUI,
@@ -17,6 +19,7 @@ import {
 
 import {
   CACHE_KEY,
+  DEFAULT_HEIGHT,
   DEFAULT_OPTIONS,
   DEFAULT_WIDTH,
   SETTINGS_KEY,
@@ -47,13 +50,12 @@ import type {
   SyncWithNotionHandler,
 } from '@/types/eventHandler'
 
-export default async function () {
-  setRelaunchButton(figma.root, 'open')
 
-  showUI({
-    width: DEFAULT_WIDTH,
-    height: 0,
-  })
+export default async function () {
+  figma.root.setRelaunchData({ open: 'Открыть Text Sync' })
+
+  showUI({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
+
 
   on<LoadOptionsFromUIHandler>('LOAD_OPTIONS_FROM_UI', async () => {
     const options = await loadSettingsAsync<Options>(
@@ -143,7 +145,7 @@ export default async function () {
       })
     }
   })
-  
+
   on<HighlightTextHandler>('HIGHLIGHT_TEXT', (keyValues, options) => {
     highlightText(keyValues, options)
   })
@@ -156,4 +158,11 @@ export default async function () {
       figma.notify(i18n.t('notifications.Settings.updateLanguage'))
     }
   })
+  // Добавим обработчик для кнопки перезапуска
+  // figma.on('run', ({ command }) => {
+  //   if (command === 'open') {
+  //     console.log('Плагин был перезапущен')
+  //     // Здесь можно добавить дополнительную логику при перезапуске
+  //   }
+  // })
 }

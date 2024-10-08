@@ -8,7 +8,8 @@
     "build:css": "tailwindcss --input ./src/ui/styles/input.css --output ./src/ui/styles/output.css",
     "build:js": "build-figma-plugin --typecheck",
     "check": "biome check",
-    "prepare": "husky || true"
+    "prepare": "husky || true",
+    "watch": "npm run build:css && concurrently -P 'npm:build:* -- {*}' -- --watch"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,cjs,mjs,json}": [
@@ -45,7 +46,12 @@
   },
   "figma-plugin": {
     "editorType": [
-      "figma"
+      "figma",
+      "dev"
+    ],
+    "capabilities": [
+      "inspect",
+      "vscode"
     ],
     "id": "1418849803064613337",
     "name": "Text Sync",
@@ -54,13 +60,14 @@
     "permissions": [
       "currentuser"
     ],
-    "relaunchButtons": {
-      "open": {
+    "relaunchButtons": [
+      {
+        "command": "open",
         "name": "Text Sync",
         "main": "src/main/index.ts",
-        "ui": "src/ui/index.tsx"
+        "multipleSelection": true
       }
-    },
+    ],
     "documentAccess": "dynamic-page",
     "networkAccess": {
       "allowedDomains": [

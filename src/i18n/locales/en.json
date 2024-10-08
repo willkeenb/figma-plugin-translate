@@ -21,8 +21,8 @@
     "clearCacheButton": "Clear cache ({{length}} items)"
   },
   "List": {
-    "filter": {
-      "placeholder": "Filter key or value property",
+    "search": {
+      "placeholder": "Search by key or value",
       "clearButton": "Clear"
     },
     "sortValue": {

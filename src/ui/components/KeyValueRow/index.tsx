@@ -40,7 +40,7 @@ export default function KeyValueRow({ keyValue, onClick, showUzbek }: RowProps) 
   const handleCopyKey = () => handleCopy(keyValue.key)
 
   return (
-    <li className="border-b border-solid gap-1 py-2 flex flex-col">
+    <li className="gap-1 p-2 flex flex-col">
       <KeyRow
         keyValue={keyValue}
         onClick={handleApplyKey}

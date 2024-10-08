@@ -1,33 +1,28 @@
 import { emit } from '@create-figma-plugin/utilities'
-
-import { DEFAULT_WIDTH } from '@/constants'
-
+import { DEFAULT_HEIGHT, DEFAULT_WIDTH } from '@/constants'
 import type { ResizeWindowHandler } from '@/types/eventHandler'
 
 export default function useResizeWindow() {
-  // Функция для изменения размера окна плагина
+  // Обновляем тип параметра options
   function resizeWindow(options?: {
-    width?: number
-    delay?: number
-  }) {
-    // Устанавливаем таймаут для выполнения изменения размера
+  width?: number
+  height?: number // Добавляем height в тип
+  delay?: number
+}, p0?: string) {
     window.setTimeout(() => {
-      // Находим элемент с id 'wrapper'
       const wrapper = document.getElementById('wrapper')
-      // Получаем высоту элемента wrapper или 0, если элемент не найден
-      const height = wrapper?.clientHeight || 0
+      // Используем переданную высоту или высоту wrapper, если она не указана
+      const width = options?.width !== undefined ? options.width : (wrapper?.clientWidth || 0)
+      const height = options?.height !== undefined ? options.height : (wrapper?.clientHeight || 0)
 
-      console.log('resizeWindow', options, wrapper, height)
+      console.log('resizeWindow', options, wrapper, width, height)
 
-      // Отправляем событие для изменения размера окна
       emit<ResizeWindowHandler>('RESIZE_WINDOW', {
-        // Используем переданную ширину или DEFAULT_WIDTH, если ширина не указана
         width: options?.width || DEFAULT_WIDTH,
-        height,
+        height: options?.width || DEFAULT_HEIGHT,
       })
-    }, options?.delay || 1) // Используем переданную задержку или 16мс по умолчанию
+    }, options?.delay || 1)
   }
 
-  // Возвращаем объект с функцией resizeWindow
   return { resizeWindow }
 }
