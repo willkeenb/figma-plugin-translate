@@ -50,8 +50,7 @@
   },
   "figma-plugin": {
     "editorType": [
-      "figma",
-      "dev"
+      "figma"
     ],
     "capabilities": [
       "inspect",

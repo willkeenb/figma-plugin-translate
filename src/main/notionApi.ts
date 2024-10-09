@@ -236,10 +236,8 @@ export async function fetchNotion({
 }
 
 // notionApi.ts
-export async function getDatabaseById(databaseId: string): Promise<any> {
-  // Example implementation
-  const apiUrl = `https://api.notion.com/v1/databases/${databaseId}/query`;
-  const response = await fetch(apiUrl, {
+export async function getDatabaseById(url: string): Promise<any> {
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${INTEGRATION_TOKEN}`,
@@ -250,6 +248,8 @@ export async function getDatabaseById(databaseId: string): Promise<any> {
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Notion API error:', errorText);
     throw new Error(`Failed to fetch database: ${response.statusText}`);
   }
 

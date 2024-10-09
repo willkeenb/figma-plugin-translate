@@ -38,29 +38,32 @@ export default function App() {
   const [mounted, setMounted] = useState(false)
   const [selectedTabValue, setSelectedTabValue] =
     useState<SelectedTabValue>('List')
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [changes, setChanges] = useState<any>(null);
 
   // Определение опций для вкладок
   const tabOptions: TabsOption[] &
     {
       value: SelectedTabValue
     }[] = [
-    {
-      children: <List />,
-      value: t('Tabs.list'),
-    },
-    {
-      children: <Utilities />,
-      value: t('Tabs.utilities'),
-    },
-    {
-      children: <Fetch />,
-      value: t('Tabs.fetch'),
-    },
-    {
-      children: <Settings />,
-      value: t('Tabs.settings'),
-    },
-  ]
+      {
+        children: <List />,
+        value: t('Tabs.list'),
+      },
+      {
+        children: <Utilities />,
+        value: t('Tabs.utilities'),
+      },
+      {
+        children: <Fetch />,
+        value: t('Tabs.fetch'),
+      },
+      {
+        children: <Settings />,
+        value: t('Tabs.settings'),
+      },
+    ]
 
   // Обработчик изменения вкладки
   function handleTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {
@@ -130,9 +133,12 @@ export default function App() {
     setSelectedTabValue(translatedTabValue as SelectedTabValue)
   }, [options.pluginLanguage])
 
+
+
   if (!mounted) {
     return null
   }
+
 
   return (
     <div id="wrapper">
@@ -144,3 +150,4 @@ export default function App() {
     </div>
   )
 }
+

@@ -1,4 +1,3 @@
-import { devModeCode } from '@/devmode/code';
 import {
   emit,
   loadSettingsAsync,
@@ -10,9 +9,7 @@ import {
 
 import {
   CACHE_KEY,
-  DEFAULT_HEIGHT,
   DEFAULT_OPTIONS,
-  DEFAULT_WIDTH,
   SETTINGS_KEY,
 } from '@/constants'
 import i18n from '@/i18n/main'
@@ -42,16 +39,7 @@ import type {
 } from '@/types/eventHandler'
 
 export default async function () {
-  console.log('Plugin initialized');
-  
-  if (figma.editorType === 'dev') {
-    console.log('Initializing Dev Mode');
-    await devModeCode();
-  } else {
-    console.log('Initializing normal plugin mode');
-    figma.root.setRelaunchData({ open: 'Открыть Text Sync' })
 
-    showUI({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT })
 
     on<LoadOptionsFromUIHandler>('LOAD_OPTIONS_FROM_UI', async () => {
       const options = await loadSettingsAsync<Options>(
@@ -150,5 +138,5 @@ export default async function () {
         figma.notify(i18n.t('notifications.Settings.updateLanguage'))
       }
     })
-  }
+
 }
