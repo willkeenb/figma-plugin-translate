@@ -1,8 +1,4 @@
-import { fetchNotion } from '@/main/notionApi'
-import { DATABASE_OPTIONS } from '@/constants'
-import type { NotionKeyValue } from '@/types/common'
-
-let cache: NotionKeyValue[] = []
+import { getDatabaseById } from '@/main/notionApi';
 
 export async function devModeCode() {
   console.log('Dev mode initialized');
@@ -12,7 +8,7 @@ export async function devModeCode() {
   figma.codegen.on('generate', async (event): Promise<CodegenResult[]> => {
     console.log('Generate event triggered', event);
     const { node } = event;
-    
+
     console.log('Node type:', node.type);
 
     if (node.type !== 'TEXT' && node.type !== 'FRAME' && node.type !== 'SECTION') {
@@ -23,71 +19,55 @@ export async function devModeCode() {
     let key = node.name.replace(/^#/, '');
     console.log('Key:', key);
 
-    let valueRu = '';
-    let valueUz = '';
-
-    const cacheEntry = cache.find(item => item.key === key);
-    if (cacheEntry) {
-      console.log('Cache entry found');
-      valueRu = cacheEntry.valueRu;
-      valueUz = cacheEntry.valueUz;
-    } else {
-      console.log('Cache entry not found, using default values');
-      if (node.type === 'TEXT') {
-        valueRu = node.characters;
-        valueUz = node.characters;
-      } else {
-        const textNode = node.findOne((n: SceneNode) => n.type === 'TEXT') as TextNode | null;
-        if (textNode) {
-          valueRu = textNode.characters;
-          valueUz = textNode.characters;
-        } else {
-          valueRu = node.name;
-          valueUz = node.name;
-        }
-      }
-    }
-
-    console.log('Values:', { valueRu, valueUz });
-
-    const ruJSON = JSON.stringify({ [key]: valueRu }, null, 2);
-    const uzJSON = JSON.stringify({ [key]: valueUz }, null, 2);
-
-    console.log('Generated JSON:', { ruJSON, uzJSON });
-
-    return [
-      {
-        title: "ru-RU.json",
-        language: "JSON",
-        code: ruJSON
-      },
-      {
-        title: "uz-UZ.json",
-        language: "JSON",
-        code: uzJSON
-      }
-    ];
-  });
-
-  figma.codegen.on('preferenceschange', async (event): Promise<void> => {
-    console.log('Preferences changed:', event);
+    // Return an empty array as a default case
+    return [];
   });
 }
 
 async function loadNotionData() {
+  const databaseId = 'your-database-id'; // Define your database ID here
+
   try {
     console.log('Starting to load Notion data');
-    const firstDatabaseId = DATABASE_OPTIONS[0].id;
-    console.log('Database ID:', firstDatabaseId);
-    cache = await fetchNotion({
-      selectedDatabaseId: firstDatabaseId,
-      keyPropertyName: 'key',
-      valuePropertyNameRu: 'ru',
-      valuePropertyNameUz: 'uz',
-      keyValuesArray: []
+    const data = await getDatabaseById(databaseId);
+    const { ruData, uzData } = formatNotionData(data);
+    const changes: { [key: string]: { [key: string]: [string, string] } } = {
+      "Изменено": {},
+      "Добавлено": {},
+      "Изменены ключи": {}
+    };
+
+    const allKeys = new Set([...Object.keys(ruData), ...Object.keys(uzData)]);
+
+    allKeys.forEach(key => {
+      const newRuValue = ruData[key] || '';
+      const newUzValue = uzData[key] || '';
+
+      if (ruData[key] && uzData[key]) {
+        changes["Добавлено"][key] = [newRuValue, newUzValue];
+      }
     });
-    console.log('Notion data loaded into cache:', cache);
+
+    figma.ui.postMessage({
+      type: 'show-changes',
+      data: changes
+    });
+
+    console.log('Notion data loaded into cache');
   } catch (error) {
     console.error('Error loading Notion data:', error);
   }
+}
+
+export function formatNotionData(data: any): { ruData: Record<string, string>, uzData: Record<string, string> } {
+  // Example implementation
+  const ruData: Record<string, string> = {};
+  const uzData: Record<string, string> = {};
+
+  data.forEach((item: any) => {
+    ruData[item.key] = item.valueRu;
+    uzData[item.key] = item.valueUz;
+  });
+
+  return { ruData, uzData };
 }

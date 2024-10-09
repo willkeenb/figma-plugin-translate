@@ -1,2 +1,14 @@
 <h2>Dev Mode Plugin</h2>
 <p>Select a text, frame, or section to generate localization JSON.</p>
+<div id="json-output"></div>
+<div id="changes-output"></div>
+<script>
+  window.onmessage = (event) => {
+    const message = event.data.pluginMessage;
+    if (message.type === 'show-json') {
+      document.getElementById('json-output').innerText = `RU JSON: ${message.data.ruJSON}\nUZ JSON: ${message.data.uzJSON}`;
+    } else if (message.type === 'show-changes') {
+      document.getElementById('changes-output').innerText = `Changes: ${JSON.stringify(message.data, null, 2)}`;
+    }
+  };
+</script>

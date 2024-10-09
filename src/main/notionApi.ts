@@ -234,3 +234,29 @@ export async function fetchNotion({
 
   return allKeyValues;
 }
+
+// notionApi.ts
+export async function getDatabaseById(databaseId: string): Promise<any> {
+  // Example implementation
+  const apiUrl = `https://api.notion.com/v1/databases/${databaseId}/query`;
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${INTEGRATION_TOKEN}`,
+      'Notion-Version': '2022-06-28',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ page_size: 100 }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch database: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.results;
+}
+
+export function formatNotionData(data: any) {
+  // function implementation
+}
