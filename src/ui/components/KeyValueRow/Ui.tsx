@@ -1,6 +1,6 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
-import { h, Fragment } from 'preact'
+import { h } from 'preact'
 import clsx from 'clsx'
 import type { NotionKeyValue } from '@/types/common'
 import { CustomIconButton } from '@/ui/components/Custom/CustomIconButton'

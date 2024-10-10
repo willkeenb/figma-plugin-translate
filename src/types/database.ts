@@ -1,5 +1,8 @@
-// Импорт типа из констант
-import type { DatabaseOptionId } from '@/constants'
+import type { DatabaseOptionId, ValuePropertyName } from '@/constants'
 
-// Реэкспорт типа
-export type { DatabaseOptionId }
+export type { DatabaseOptionId, ValuePropertyName }
+export type DatabaseOption = {
+  id: DatabaseOptionId
+  name: string
+}
+export type DatabaseOptions = DatabaseOption[]

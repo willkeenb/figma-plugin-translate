@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'preact-i18next'
 import { DATABASE_OPTIONS, PROXY_URL } from '@/constants'
 
 import type {

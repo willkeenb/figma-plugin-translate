@@ -26,13 +26,15 @@ export const DATABASE_OPTIONS = [
 
 // Опции свойств значений
 export const VALUE_PROPERTY_OPTIONS = [
-  { value: 'ru', labelKey: 'Русский' },
-  { value: 'uz', labelKey: 'Узбекский' },
+  { value: 'valueRu', labelKey: 'Русский' },
+  { value: 'valueUz', labelKey: 'Узбекский' },
 ] as const;
+
+// Тип для имени свойства значения
+export type ValuePropertyName = typeof VALUE_PROPERTY_OPTIONS[number]['value'] | 'ru' | 'uz' | '';
 
 // Типы для ID базы данных и имени свойства значения
 export type DatabaseOptionId = typeof DATABASE_OPTIONS[number]['id'] | '';
-export type ValuePropertyName = typeof VALUE_PROPERTY_OPTIONS[number]['value'] | '';
 
 // Стандартная ширина интерфейса плагина
 export const DEFAULT_WIDTH = 400
@@ -54,6 +56,5 @@ export const DEFAULT_OPTIONS: Options = {
   includeComponents: true,
   includeInstances: false,
   // Настройки плагина
-  pluginLanguage: 'en',
-  options: {}
+  pluginLanguage: 'en'
 }

@@ -1,8 +1,7 @@
 /** @jsx h */
-import { h } from 'preact'
 import { useRef } from 'preact/hooks'
 import clsx from 'clsx'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'preact-i18next'
 import { useUpdateEffect } from 'react-use'
 import KeyValueRow from '@/ui/components/KeyValueRow'
 import { useKeyValueListLogic } from './logic'

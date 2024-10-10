@@ -1,6 +1,6 @@
 /** @jsx h */
 import { h } from 'preact'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'preact-i18next'
 import { useKeyValueLogic } from './logic'
 import { useKeyValueApi } from './api'
 import { KeyRow, ValueRowContent } from './Ui'

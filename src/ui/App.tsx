@@ -1,10 +1,11 @@
 /** @jsx h */
-import { type JSX, h } from 'preact'
-import { useState } from 'preact/hooks'
+/** @jsxFrag Fragment */
+import { JSX } from 'preact'
+import { useEffect, useState } from 'preact/hooks'
 
 import { Tabs, type TabsOption } from '@create-figma-plugin/ui'
 import { emit, on } from '@create-figma-plugin/utilities'
-import { useTranslation } from 'react-i18next'
+import { useTranslation } from 'preact-i18next'
 import { useMount, useUnmount, useUpdateEffect } from 'react-use'
 
 import { useStore } from '@/ui/Store'
@@ -83,21 +84,25 @@ export default function App() {
   }
 
   // Эффект при монтировании компонента
-  useMount(async () => {
-    console.log('App mounted start')
+  useEffect(() => {
+    const initializeApp = async () => {
+      console.log('App mounted start')
 
-    // Загрузка настроек из clientStorage
-    await loadOptionsFromClientStorage()
+      // Загрузка настроек из clientStorage
+      await loadOptionsFromClientStorage()
 
-    // Загрузка кэша keyValues из документа
-    await loadCacheFromDocument()
+      // Загрузка кэша keyValues из документа
+      await loadCacheFromDocument()
 
-    // Завершение монтирования
-    console.log('App mounted done')
-    setMounted(true)
+      // Завершение монтирования
+      console.log('App mounted done')
+      setMounted(true)
 
-    resizeWindow()
-  })
+      resizeWindow()
+    }
+
+    initializeApp()
+  }, [])
 
   // Эффект при размонтировании компонента
   useUnmount(() => {
@@ -116,11 +121,13 @@ export default function App() {
   }, [options.selectedTabKey])
 
   // Эффект при изменении языка плагина
-  useUpdateEffect(async () => {
+  useUpdateEffect(() => {
     console.log('pluginLanguage update on App', options.pluginLanguage)
 
     // Смена языка UI
-    await i18n.changeLanguage(options.pluginLanguage)
+    i18n.changeLanguage(options.pluginLanguage).catch(error => {
+      console.error('Ошибка при смене языка:', error)
+    })
 
     // Смена языка в основной части плагина
     emit<ChangeLanguageHandler>('CHANGE_LANGUAGE', options.pluginLanguage)

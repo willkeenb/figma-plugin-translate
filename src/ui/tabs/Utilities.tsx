@@ -1,5 +1,5 @@
 /** @jsx h */
-import { type JSX, h } from 'preact'
+import { JSX } from 'preact'
 
 import {
   Button,

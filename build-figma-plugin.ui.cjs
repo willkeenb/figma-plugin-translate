@@ -1,10 +1,11 @@
-const dotenv = require('dotenv')
-// Загружаем переменные окружения из .env файла и преобразуем их в JSON строку
-const env = JSON.stringify(dotenv.config().parsed)
+import dotenv from 'dotenv';
 
-module.exports = buildOptions => {
+// Загружаем переменные окружения из .env файла и преобразуем их в JSON строку
+const env = JSON.stringify(dotenv.config().parsed);
+
+export default (buildOptions) => {
   // Определяем, находимся ли мы в производственном режиме
-  const isProduction = process.env.NODE_ENV === 'production'
+  const isProduction = process.env.NODE_ENV === 'production';
 
   return {
     // Распространяем все существующие опции сборки
@@ -36,5 +37,5 @@ module.exports = buildOptions => {
 
     // Настраиваем loader для обработки JSX в файлах с расширением .js
     loader: { '.js': 'jsx' },
-  }
-}
+  };
+};

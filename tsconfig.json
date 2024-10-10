@@ -1,18 +1,43 @@
 {
   "extends": "@create-figma-plugin/tsconfig",
   "compilerOptions": {
-    "jsx": "react",
-    "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment",
-    "typeRoots": ["node_modules/@figma", "node_modules/@types", "src/types"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "jsxFactory": "",
+    "jsxFragmentFactory": "",
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "lib": [
+      "DOM",
+      "ES2020"
+    ],
+    "moduleResolution": "node",
+    "target": "ES2015",
+    "module": "ES2015",
+    "strict": true,
+    "types": [
+      "jest",
+      "node"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "react": ["node_modules/preact/compat/"],
+      "react-dom": ["node_modules/preact/compat/"]
     },
     "skipLibCheck": true,
     "resolveJsonModule": true,
-
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/tests/runTests.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

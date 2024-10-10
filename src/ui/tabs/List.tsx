@@ -1,5 +1,5 @@
 /** @jsx h */
-import { Fragment, type JSX, h } from 'preact'
+import { JSX, Fragment } from 'preact'
 import { useState, useCallback, useMemo, useEffect } from 'preact/hooks'
 import {
   Button,

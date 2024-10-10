@@ -1,6 +1,4 @@
 /** @jsx h */
-import { icon } from '@/ui/styles/output.css'
-import { h } from 'preact'
 
 type CustomIconButtonProps = {
   onClick: (e: MouseEvent | KeyboardEvent) => void

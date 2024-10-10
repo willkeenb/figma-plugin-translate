@@ -1,5 +1,5 @@
 // Импорт типов из файла database
-import type { DatabaseOptionId, ValuePropertyName } from './database'
+import type { DatabaseOptionId, ValuePropertyName } from '@/constants'
 
 // Определение возможных ключей вкладок
 export type SelectedTabKey = 'fetch' | 'list' | 'utilities' | 'settings'
@@ -19,9 +19,6 @@ export type PluginLanguage = 'en' | 'ja' | 'ru'
 
 // Основные настройки плагина
 export type Options = {
-  [x: string]: any
-  options: any
-  options: any
   // Настройки для вкладки fetch
   selectedTabKey: SelectedTabKey
   selectedDatabaseId: DatabaseOptionId

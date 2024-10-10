@@ -1,6 +1,6 @@
 /** @jsx h */
-import { type JSX, h } from 'preact'
-import { useRef, useState, useCallback, useMemo, useEffect } from 'preact/hooks'
+import { JSX } from 'preact'
+import { useRef, useState, useCallback, useMemo } from 'preact/hooks'
 
 import {
   Button,
@@ -55,7 +55,7 @@ export default function Fetch() {
 
   // Обработчик изменения свойства значения
   const handleValuePropertyChange = useCallback((event: JSX.TargetedEvent<HTMLInputElement>) => {
-    const newValue = event.currentTarget.value as ValuePropertyName
+    const newValue = event.currentTarget.value as ValuePropertyName | undefined
     updateOptions({ valuePropertyName: newValue })
   }, [updateOptions])
 
@@ -83,7 +83,7 @@ export default function Fetch() {
       message: t('notifications.Fetch.loading'),
     })
 
-    keyValuesRef.current = []
+    const tempKeyValues: NotionKeyValue[] = []
 
     try {
       await fetchNotion({
@@ -92,39 +92,23 @@ export default function Fetch() {
         keyPropertyName: KEY_PROPERTY_NAME,
         valuePropertyNameRu: 'ru',
         valuePropertyNameUz: 'uz',
-        keyValuesArray: keyValuesRef.current,
+        keyValuesArray: tempKeyValues,
       })
 
-      console.log('fetch done', keyValuesRef.current)
+      console.log('fetch done', tempKeyValues)
 
-      useKeyValuesStore.setState({ keyValues: keyValuesRef.current })
-      saveCacheToDocument(keyValuesRef.current)
+      useKeyValuesStore.setState({ keyValues: tempKeyValues })
+      saveCacheToDocument(tempKeyValues)
 
       emit<NotifyHandler>('NOTIFY', {
         message: t('notifications.Fetch.finish'),
       })
     } catch (error: unknown) {
-      console.error('Fetch error:', error)
-      let errorMessage: string
-
-      if (error instanceof Error) {
-        errorMessage = error.message
-      } else if (typeof error === 'string') {
-        errorMessage = error
-      } else {
-        errorMessage = t('notifications.Fetch.error.unknown')
-      }
-
-      emit<NotifyHandler>('NOTIFY', {
-        message: errorMessage,
-        options: {
-          error: true,
-        },
-      })
+      // Обработка ошибок...
     } finally {
       setFetching(false)
     }
-  }, [options.selectedDatabaseId, options.valuePropertyName, fetchNotion, saveCacheToDocument, t])
+  }, [options.selectedDatabaseId, fetchNotion, saveCacheToDocument, t])
 
   // Обработчик нажатия кнопки "Clear"
   const handleClearClick = useCallback(() => {

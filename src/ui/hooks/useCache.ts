@@ -1,40 +1,32 @@
-import { emit, once } from '@create-figma-plugin/utilities'
-
-import { useKeyValuesStore } from '@/ui/Store'
-
+import { emit, on } from '@create-figma-plugin/utilities'
+import { useCallback } from 'preact/hooks'
 import type { NotionKeyValue } from '@/types/common'
-import type {
-  LoadCacheFromMainHandler,
-  LoadCacheFromUIHandler,
-  SaveCacheHandler,
-} from '@/types/eventHandler'
+import type { LoadCacheFromUIHandler, LoadCacheFromMainHandler, SaveCacheHandler } from '@/types/eventHandler'
 
-export default function useCache() {
-  // Функция для загрузки кэша из документа
-  function loadCacheFromDocument() {
-    return new Promise<NotionKeyValue[]>(resolve => {
-      console.log('loadCacheFromDocument')
-
-      // Устанавливаем одноразовый обработчик события 'LOAD_CACHE_FROM_MAIN'
-      once<LoadCacheFromMainHandler>('LOAD_CACHE_FROM_MAIN', keyValues => {
-        console.log('cached keyValues', keyValues)
-        // Обновляем состояние хранилища ключ-значений
-        useKeyValuesStore.setState({ keyValues })
-        resolve(keyValues)
-      })
-
-      // Отправляем событие для запроса кэша из основной части плагина
-      emit<LoadCacheFromUIHandler>('LOAD_CACHE_FROM_UI')
-    })
-  }
-
-  // Функция для сохранения кэша в документ
-  function saveCacheToDocument(keyValues: NotionKeyValue[]) {
-    console.log('saveCacheToDocument', keyValues)
-    // Отправляем событие для сохранения кэша в основной части плагина
-    emit<SaveCacheHandler>('SAVE_CACHE', keyValues)
-  }
-
-  // Возвращаем объект с функциями для работы с кэшем
-  return { loadCacheFromDocument, saveCacheToDocument }
+interface CacheFunctions {
+  loadCacheFromDocument: () => Promise<void>
+  saveCacheToDocument: (keyValues: NotionKeyValue[]) => void
 }
+
+const useCache = (): CacheFunctions => {
+  const loadCacheFromDocument = useCallback(() => {
+    return new Promise<void>((resolve) => {
+      emit<LoadCacheFromUIHandler>('LOAD_CACHE_FROM_UI')
+      on<LoadCacheFromMainHandler>('LOAD_CACHE_FROM_MAIN', (cache) => {
+        // Здесь вы можете обновить состояние вашего приложения с полученным кэшем
+        resolve()
+      })
+    })
+  }, [])
+
+  const saveCacheToDocument = useCallback((keyValues: NotionKeyValue[]) => {
+    emit<SaveCacheHandler>('SAVE_CACHE', keyValues)
+  }, [])
+
+  return {
+    loadCacheFromDocument,
+    saveCacheToDocument
+  }
+}
+
+export default useCache

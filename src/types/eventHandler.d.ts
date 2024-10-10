@@ -6,6 +6,12 @@ import type {
 } from '@/types/common'
 import type { EventHandler } from '@create-figma-plugin/utilities'
 
+type CommonOptions = {
+  targetTextRange: TargetTextRange
+  includeComponents: boolean
+  includeInstances: boolean
+}
+
 interface LoadOptionsFromUIHandler extends EventHandler {
   name: 'LOAD_OPTIONS_FROM_UI'
   handler: () => void
@@ -53,14 +59,7 @@ interface ApplyKeyValueHandler extends EventHandler {
 
 interface ApplyValueHandler extends EventHandler {
   name: 'APPLY_VALUE'
-  handler: (
-    keyValues: NotionKeyValue[],
-    options: {
-      targetTextRange: TargetTextRange
-      includeComponents: boolean
-      includeInstances: boolean
-    },
-  ) => void
+  handler: (keyValues: NotionKeyValue[], options: CommonOptions) => void
 }
 
 interface UpdateKeyValueHandler extends EventHandler {
@@ -70,26 +69,12 @@ interface UpdateKeyValueHandler extends EventHandler {
 
 interface RenameLayerHandler extends EventHandler {
   name: 'RENAME_LAYER'
-  handler: (
-    keyValues: NotionKeyValue[],
-    options: {
-      targetTextRange: TargetTextRange
-      includeComponents: boolean
-      includeInstances: boolean
-    },
-  ) => void
+  handler: (keyValues: NotionKeyValue[], options: CommonOptions) => void
 }
 
 interface HighlightTextHandler extends EventHandler {
   name: 'HIGHLIGHT_TEXT'
-  handler: (
-    keyValues: NotionKeyValue[],
-    options: {
-      targetTextRange: TargetTextRange
-      includeComponents: boolean
-      includeInstances: boolean
-    },
-  ) => void
+  handler: (keyValues: NotionKeyValue[], options: CommonOptions) => void
 }
 
 interface ChangeLanguageHandler extends EventHandler {
@@ -116,6 +101,5 @@ export type {
   UpdateKeyValueHandler,
   RenameLayerHandler,
   HighlightTextHandler,
-  ChangeLanguageHandler,
-  SyncWithNotionHandler
+  ChangeLanguageHandler
 }
