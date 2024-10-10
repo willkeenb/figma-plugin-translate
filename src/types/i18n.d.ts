@@ -7,3 +7,9 @@ declare module 'i18next' {
     resources: (typeof resources)['en']
   }
 }
+
+// Определение типа для функции перевода
+export type TFunction = {
+  (key: string | string[]): string;
+  <T extends Record<string, unknown>>(key: string | string[], options: T): string;
+};

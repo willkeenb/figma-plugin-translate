@@ -59,7 +59,7 @@ export default function KeyValueList({ rows, className, showUzbek }: KeyValuePro
   return (
     <div className={clsx('relative', className)}>
       {rows.length > 0 ? (
-        <ul className="h-full overflow-x-hidden overflow-y-auto" ref={listRef}>
+        <ul className="overflow-hidden" ref={listRef}>
           {rows.map((row) => (
             <KeyValueRow
               key={row.id}

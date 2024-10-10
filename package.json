@@ -4,12 +4,13 @@
   "license": "MIT",
   "author": "My",
   "scripts": {
-    "build": "NODE_ENV=production concurrently -P 'npm:build:* -- {*}' -- --minify",
+    "build": "NODE_ENV=production build-figma-plugin --minify",
     "build:css": "tailwindcss --input ./src/ui/styles/input.css --output ./src/ui/styles/output.css",
     "build:js": "build-figma-plugin --typecheck",
     "check": "biome check",
     "prepare": "husky || true",
-    "watch": "npm run build:css && concurrently -P 'npm:build:* -- {*}' -- --watch"
+    "watch": "npm run build:css && concurrently -P 'npm:build:* -- {*}' -- --watch",
+    "dev": "NODE_ENV=development build-figma-plugin --watch"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,cjs,mjs,json}": [
@@ -78,5 +79,6 @@
         "https://reverse-proxy.willkeenbe.workers.dev"
       ]
     }
-  }
+  },
+  "packageManager": "yarn@4.5.0+sha512.837566d24eec14ec0f5f1411adb544e892b3454255e61fdef8fd05f3429480102806bac7446bc9daff3896b01ae4b62d00096c7e989f1596f2af10b927532f39"
 }

@@ -135,12 +135,11 @@ export default function App() {
   }
 
   return (
-    <div id="wrapper">
       <Tabs
+        className="navigation-tabs"
         options={tabOptions}
         onChange={handleTabChange}
         value={selectedTabValue}
       />
-    </div>
   )
 }

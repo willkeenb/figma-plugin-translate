@@ -35,8 +35,8 @@ export type DatabaseOptionId = typeof DATABASE_OPTIONS[number]['id'] | '';
 export type ValuePropertyName = typeof VALUE_PROPERTY_OPTIONS[number]['value'] | '';
 
 // Стандартная ширина интерфейса плагина
-export const DEFAULT_WIDTH = 240
-export const DEFAULT_HEIGHT = 800
+export const DEFAULT_WIDTH = 360
+export const DEFAULT_HEIGHT = 480
 
 // Настройки по умолчанию
 export const DEFAULT_OPTIONS: Options = {

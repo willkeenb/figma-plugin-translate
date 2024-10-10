@@ -159,6 +159,7 @@ declare const styles: {
   readonly "opacity-0": string;
   readonly "opacity-100": string;
   readonly "outline-none": string;
+  readonly "overflow-auto": string;
   readonly "overflow-hidden": string;
   readonly "overflow-x-hidden": string;
   readonly "overflow-y-auto": string;

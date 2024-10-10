@@ -37,7 +37,7 @@
     },
     "statusBar": {
       "text": "Click row to apply key & value to text or copy",
-      "count": "{{length}} items"
+      "count": "Количество элементов: {length}"
     },
     "empty": {
       "text": "No items.",
